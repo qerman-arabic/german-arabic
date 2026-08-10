@@ -40,7 +40,7 @@ export default function GrammarPage() {
       </div>
 
       <div className="pills" style={{ marginBottom: 20 }}>
-        {['A1', 'A2', 'B1'].map((l) => (
+        {['A1', 'A2', 'B1', 'B2'].map((l) => (
           <button
             key={l}
             className="pill"
