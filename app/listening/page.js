@@ -16,7 +16,9 @@ const kindIcon = {
 };
 
 export default function ListeningPage() {
+  const [userId, setUserId] = useState(null);
   const [exercises, setExercises] = useState([]);
+  const [done, setDone] = useState({});
   const [level, setLevel] = useState('A1');
   const [current, setCurrent] = useState(null);
   const [answers, setAnswers] = useState({});
@@ -27,12 +29,29 @@ export default function ListeningPage() {
 
   useEffect(() => {
     async function load() {
-      const { data } = await supabase
+      const { data } = await supabase.auth.getSession();
+      const session = data?.session;
+
+      if (session) {
+        setUserId(session.user.id);
+        const { data: prog } = await supabase
+          .from('listening_progress')
+          .select('*')
+          .eq('user_id', session.user.id);
+
+        const map = {};
+        (prog || []).forEach((p) => (map[p.exercise_id] = p.score));
+        setDone(map);
+      }
+
+      const { data: ex } = await supabase
         .from('listening_exercises')
         .select('*')
         .order('sort_order');
-      setExercises(data || []);
+
+      setExercises(ex || []);
     }
+
     load();
   }, []);
 
@@ -84,7 +103,7 @@ export default function ListeningPage() {
     setAnswers((prev) => ({ ...prev, [qi]: oi }));
   }
 
-  function submit() {
+  async function submit() {
     if (submitted) return;
 
     if (Object.keys(answers).length < current.questions.length) {
@@ -99,9 +118,54 @@ export default function ListeningPage() {
 
     const total = current.questions.length;
     const percent = Math.round((correct / total) * 100);
+    const passed = percent >= 60;
+
+    let pointsEarned = 0;
+
+    if (userId) {
+      pointsEarned = correct * 5 + (passed ? 20 : 0);
+
+      await supabase.from('listening_progress').upsert(
+        {
+          user_id: userId,
+          exercise_id: current.id,
+          score: percent,
+          updated_at: new Date().toISOString(),
+        },
+        { onConflict: 'user_id,exercise_id' }
+      );
+
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', userId)
+        .single();
+
+      const today = new Date().toDateString();
+      const last = profile?.last_activity_date
+        ? new Date(profile.last_activity_date).toDateString()
+        : null;
+
+      let streak = profile?.streak ?? 0;
+      if (last !== today) {
+        const yesterday = new Date(Date.now() - 86400000).toDateString();
+        streak = last === yesterday ? streak + 1 : 1;
+      }
+
+      await supabase
+        .from('profiles')
+        .update({
+          points: (profile?.points ?? 0) + pointsEarned,
+          streak,
+          last_activity_date: new Date().toISOString(),
+        })
+        .eq('id', userId);
+
+      setDone((prev) => ({ ...prev, [current.id]: percent }));
+    }
 
     setSubmitted(true);
-    setResult({ correct, total, percent });
+    setResult({ correct, total, percent, passed, pointsEarned });
   }
 
   return (
@@ -116,7 +180,8 @@ export default function ListeningPage() {
           <div className="card" style={{ marginBottom: 18 }}>
             <p className="muted" style={{ margin: 0, lineHeight: 2 }}>
               تدريبات استماع بأسلوب امتحان Goethe: إعلانات، محادثات، نشرات، ونقاشات.
-              اضغط 🔊 واستمع ثم أجب عن أسئلة الفهم. في الحوارات ستسمع نبرتين مختلفتين لشخصين!
+              اضغط 🔊 واستمع ثم أجب. في الحوارات ستسمع نبرتين مختلفتين لشخصين!
+              أكمل التدريب بنسبة 60%+ لتحصل على النقاط وعلامة ✅.
             </p>
           </div>
 
@@ -142,13 +207,26 @@ export default function ListeningPage() {
               <div
                 key={ex.id}
                 className="card"
-                style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 10 }}
+                style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  flexWrap: 'wrap',
+                  gap: 10,
+                }}
               >
                 <div>
                   <div style={{ fontWeight: 800, fontSize: 16 }}>
                     {kindIcon[ex.kind] || '🎧'} {ex.title_ar}
                   </div>
-                  <span className="chip" style={{ marginTop: 6 }}>{ex.kind}</span>
+                  <div style={{ display: 'flex', gap: 6, marginTop: 6, flexWrap: 'wrap' }}>
+                    <span className="chip">{ex.kind}</span>
+                    {done[ex.id] !== undefined && (
+                      <span className="chip" style={{ background: '#dcfce7', color: '#16a34a' }}>
+                        ✅ مكتمل {done[ex.id]}%
+                      </span>
+                    )}
+                  </div>
                 </div>
                 <button className="btn btn-primary" onClick={() => open(ex)}>
                   ابدأ التدريب
@@ -163,7 +241,13 @@ export default function ListeningPage() {
             <h2 style={{ margin: 0, fontSize: 22, fontWeight: 900 }}>
               {kindIcon[current.kind] || '🎧'} {current.title_ar}
             </h2>
-            <button className="btn btn-ghost" onClick={() => { stopAudio(); setCurrent(null); }}>
+            <button
+              className="btn btn-ghost"
+              onClick={() => {
+                stopAudio();
+                setCurrent(null);
+              }}
+            >
               ← كل التدريبات
             </button>
           </div>
@@ -186,7 +270,9 @@ export default function ListeningPage() {
 
           {(current.questions || []).map((q, qi) => (
             <div key={qi} className="card" style={{ marginBottom: 14 }}>
-              <p style={{ fontWeight: 800, marginBottom: 10 }}>{qi + 1}. {q.q}</p>
+              <p style={{ fontWeight: 800, marginBottom: 10 }}>
+                {qi + 1}. {q.q}
+              </p>
 
               <div style={{ display: 'grid', gap: 8 }}>
                 {q.o.map((opt, oi) => {
@@ -210,14 +296,21 @@ export default function ListeningPage() {
           </button>
 
           {result && (
-            <div className={`result-box ${result.percent >= 60 ? 'result-good' : 'result-warn'}`}>
-              فهمك السمعي: {result.correct} من {result.total} ({result.percent}%)
-              <br />
-              {result.percent >= 80
-                ? '🎧 ممتاز! أذناك مدرّبتان كأساسي لامتحان Goethe.'
-                : result.percent >= 60
-                ? '✅ جيد! أعد الاستماع لترسيخ الفهم.'
-                : '⚠️ استمع للمقطع مرات أكثر وركّز على الأرقام والتفاصيل.'}
+            <div className={`result-box ${result.passed ? 'result-good' : 'result-warn'}`}>
+              {result.passed
+                ? `🎉 أتممت التدريب بنجاح! نتيجتك ${result.correct} من ${result.total} (${result.percent}%)`
+                : `نتيجتك ${result.correct} من ${result.total} (${result.percent}%) — أعد الاستماع وحاول مجددًا`}
+              {userId && result.passed && (
+                <>
+                  <br />+{result.pointsEarned} نقطة أُضيفت لحسابك ⭐
+                </>
+              )}
+              {!userId && (
+                <>
+                  <br />
+                  سجّل الدخول لحفظ تقدمك وكسب النقاط.
+                </>
+              )}
             </div>
           )}
         </>
