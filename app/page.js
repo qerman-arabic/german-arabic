@@ -3,6 +3,13 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '../lib/supabase';
 
+const FEATURES = [
+  { icon: '🎓', title: 'نماذج بأسلوب Goethe', desc: '60 نموذج امتحان يقيس الاستماع والقراءة والمفردات والقواعد.' },
+  { icon: '🤖', title: 'معلم ذكاء اصطناعي', desc: 'يشرح القواعد ويصحح كتابتك ويقيّم نطقك بالعربية.' },
+  { icon: '🎧', title: 'استماع وشفوي حقيقيان', desc: '60 مقطعًا و60 سيناريو محاكاة بالمايك كما في الامتحان.' },
+  { icon: '🏅', title: 'شهادات إتمام', desc: 'شهادة PDF باسمك عند إنهاء كل مستوى، بنقاط وسلسلة أيام.' },
+];
+
 export default function HomePage() {
   const [stats, setStats] = useState(null);
 
@@ -57,7 +64,6 @@ export default function HomePage() {
 
   return (
     <main>
-      {/* الشريط العلوي */}
       <header
         className="container"
         style={{
@@ -74,7 +80,6 @@ export default function HomePage() {
         </div>
       </header>
 
-      {/* الواجهة */}
       <section className="container" style={{ textAlign: 'center', padding: '60px 0 30px' }}>
         <span className="chip" style={{ marginBottom: 16 }}>
           منصة عربية متكاملة للتحضير لامتحان Goethe
@@ -85,8 +90,8 @@ export default function HomePage() {
           من الصفر حتى B2
         </h1>
         <p className="muted" style={{ maxWidth: 640, margin: '0 auto 26px', lineHeight: 2 }}>
-          دروس مترابطة، مفردات، قواعد شاملة، استماع وقراءة وكتابة وشفوي بأسلوب الامتحان،
-          ومعلم ذكاء اصطناعي يصحح لك ويحادثك — كل ذلك في مكان واحد.
+          دروس مترابطة، مفردات، قواعد شاملة، واستماع وقراءة وكتابة وشفوي بأسلوب
+          الامتحان، ومعلم ذكاء اصطناعي يصحح لك — في مكان واحد.
         </p>
         <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
           <a className="btn btn-primary btn-lg" href="/register">ابدأ التعلم مجانًا</a>
@@ -94,7 +99,6 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* الأرقام الكلية */}
       <section className="container" style={{ padding: '20px 0' }}>
         <div
           className="card"
@@ -114,3 +118,43 @@ export default function HomePage() {
         </div>
 
         <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))',
+            gap: 12,
+          }}
+        >
+          {items.map((it) => (
+            <div key={it.label} className="card" style={{ textAlign: 'center' }}>
+              <div style={{ fontSize: 28, marginBottom: 4 }}>{it.icon}</div>
+              <div style={{ fontSize: 24, fontWeight: 900, color: 'var(--primary-dark)' }}>
+                {it.value.toLocaleString('ar-EG')}+
+              </div>
+              <div className="muted small" style={{ fontWeight: 700 }}>{it.label}</div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section className="container" style={{ padding: '26px 0 60px' }}>
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))',
+            gap: 14,
+          }}
+        >
+          {FEATURES.map((f) => (
+            <div key={f.title} className="card">
+              <div style={{ fontSize: 28, marginBottom: 8 }}>{f.icon}</div>
+              <b>{f.title}</b>
+              <p className="muted small" style={{ margin: '6px 0 0', lineHeight: 1.9 }}>
+                {f.desc}
+              </p>
+            </div>
+          ))}
+        </div>
+      </section>
+    </main>
+  );
+}
