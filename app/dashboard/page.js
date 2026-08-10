@@ -84,6 +84,7 @@ export default function DashboardPage() {
         <a className="pill" href="/ai">المعلم الذكي 🤖</a>
         <a className="pill" href="/goethe">نماذج Goethe 🎓</a>
         <a className="pill" href="/listening">استماع 🎧</a>
+        <a className="pill" href="/writing">كتابة ✍️</a>
         <a className="pill" href="/grammar">القواعد 📘</a>
         <a className="pill" href="/review">المراجعة 🧠</a>
         <a className="pill" href="/quiz">اختبار سريع 🎯</a>
