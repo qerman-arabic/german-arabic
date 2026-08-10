@@ -3,9 +3,12 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '../../lib/supabase';
 
+const ADMIN_EMAIL = 'moayad.ahmad2014@gmail.com';
+
 export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
   const [userName, setUserName] = useState('');
+  const [isAdmin, setIsAdmin] = useState(false);
   const [profile, setProfile] = useState(null);
   const [levels, setLevels] = useState([]);
   const [completedLessons, setCompletedLessons] = useState([]);
@@ -19,6 +22,8 @@ export default function DashboardPage() {
         window.location.href = '/login';
         return;
       }
+
+      setIsAdmin(session.user.email === ADMIN_EMAIL);
 
       const [profileRes, levelsRes, progressRes] = await Promise.all([
         supabase.from('profiles').select('*').eq('id', session.user.id).single(),
@@ -86,12 +91,21 @@ export default function DashboardPage() {
         <a className="pill" href="/listening">استماع 🎧</a>
         <a className="pill" href="/writing">كتابة ✍️</a>
         <a className="pill" href="/speaking">شفوي 🗣️</a>
-        <a className="pill" href="/certificate">شهاداتي 🎓</a>
         <a className="pill" href="/grammar">القواعد 📘</a>
         <a className="pill" href="/review">المراجعة 🧠</a>
         <a className="pill" href="/quiz">اختبار سريع 🎯</a>
         <a className="pill" href="/stats">الإحصائيات 📊</a>
+        <a className="pill" href="/certificate">شهاداتي 🎓</a>
         <a className="pill" href="/profile">حسابي 👤</a>
+        {isAdmin && (
+          <a
+            className="pill"
+            href="/admin"
+            style={{ background: '#111827', color: '#fff', borderColor: '#111827' }}
+          >
+            إدارة 🛠️
+          </a>
+        )}
         <button className="pill pill-danger" onClick={handleLogout}>خروج</button>
       </nav>
 
