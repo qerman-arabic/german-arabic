@@ -3,131 +3,9 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '../../lib/supabase';
 
-const SCENARIOS = [
-  {
-    level: 'A1',
-    title: 'التعارف في الامتحان',
-    questions: [
-      'Wie heißen Sie?',
-      'Woher kommen Sie?',
-      'Wo wohnen Sie?',
-      'Wie alt sind Sie?',
-      'Welche Sprachen sprechen Sie?',
-    ],
-  },
-  {
-    level: 'A1',
-    title: 'يومك اليومي',
-    questions: [
-      'Wann stehen Sie auf?',
-      'Was essen Sie zum Frühstück?',
-      'Was machen Sie am Morgen?',
-      'Was machen Sie am Wochenende?',
-      'Was ist Ihr Hobby?',
-    ],
-  },
-  {
-    level: 'A1',
-    title: 'التهجئة والأرقام',
-    questions: [
-      'Buchstabieren Sie bitte Ihren Namen.',
-      'Wie ist Ihre Telefonnummer?',
-      'Wie alt sind Sie?',
-      'Welches Datum haben wir heute?',
-      'Wie viel kostet ein Kaffee? Sagen Sie einen Preis.',
-    ],
-  },
-  {
-    level: 'A2',
-    title: 'التعارف الموسع',
-    questions: [
-      'Stellen Sie sich bitte vor.',
-      'Erzählen Sie etwas über Ihre Familie.',
-      'Was machen Sie in Ihrer Freizeit?',
-      'Warum lernen Sie Deutsch?',
-    ],
-  },
-  {
-    level: 'A2',
-    title: 'التخطيط لحفلة مع صديق',
-    questions: [
-      'Wir wollen eine Party planen. Wann sollen wir feiern?',
-      'Wo sollen wir feiern?',
-      'Was sollen wir kaufen?',
-      'Wen sollen wir einladen?',
-    ],
-  },
-  {
-    level: 'A2',
-    title: 'موقف: في المتجر',
-    questions: [
-      'Guten Tag! Was möchten Sie kaufen?',
-      'Welche Größe brauchen Sie?',
-      'Möchten Sie bar oder mit Karte bezahlen?',
-      'Brauchen Sie eine Tasche?',
-    ],
-  },
-  {
-    level: 'B1',
-    title: 'تقديم النفس الكامل',
-    questions: [
-      'Stellen Sie sich bitte vor.',
-      'Erzählen Sie von Ihrer Arbeit oder Ausbildung.',
-      'Warum lernen Sie Deutsch?',
-      'Was sind Ihre Pläne für die Zukunft?',
-    ],
-  },
-  {
-    level: 'B1',
-    title: 'وصف صورة والتعليق',
-    questions: [
-      'Beschreiben Sie bitte dieses Bild: Eine Familie sitzt am Tisch und isst zusammen.',
-      'Was denken Sie: Ist das Familienessen wichtig? Warum?',
-      'Wie war das bei Ihnen in Ihrer Heimat?',
-    ],
-  },
-  {
-    level: 'B1',
-    title: 'الاتفاق على موعد',
-    questions: [
-      'Wir müssen einen Termin für unser Treffen finden. Ich kann am Montag. Und Sie?',
-      'Montag ist schlecht. Geht es am Dienstag?',
-      'Dienstag um 10 Uhr? Passt das?',
-      'Gut, wo treffen wir uns?',
-    ],
-  },
-  {
-    level: 'B2',
-    title: 'عرض قصير: وسائل التواصل',
-    questions: [
-      'Halten Sie bitte einen kurzen Vortrag zum Thema: Soziale Medien. Sagen Sie Ihre Meinung und zwei Argumente.',
-      'Nennen Sie bitte ein Beispiel aus Ihrem Leben.',
-      'Was sind die Nachteile? Nennen Sie zwei.',
-    ],
-  },
-  {
-    level: 'B2',
-    title: 'مقابلة عمل',
-    questions: [
-      'Erzählen Sie etwas über sich.',
-      'Was sind Ihre Stärken?',
-      'Warum sollen wir Sie nehmen?',
-      'Wo sehen Sie sich in fünf Jahren?',
-    ],
-  },
-  {
-    level: 'B2',
-    title: 'نقاش: السيارات في المدينة',
-    questions: [
-      'Diskutieren Sie mit mir: Sollte das Auto in der Innenstadt verboten werden? Was meinen Sie?',
-      'Aber viele Menschen brauchen das Auto. Was sagen Sie dazu?',
-      'Haben Sie einen Kompromiss-Vorschlag?',
-    ],
-  },
-];
-
 export default function SpeakingPage() {
   const [userId, setUserId] = useState(null);
+  const [scenarios, setScenarios] = useState([]);
   const [level, setLevel] = useState('A1');
   const [scenario, setScenario] = useState(null);
   const [qIndex, setQIndex] = useState(0);
@@ -143,11 +21,18 @@ export default function SpeakingPage() {
     async function load() {
       const { data } = await supabase.auth.getSession();
       if (data?.session) setUserId(data.session.user.id);
+
+      const { data: sc } = await supabase
+        .from('speaking_scenarios')
+        .select('*')
+        .order('sort_order');
+
+      setScenarios(sc || []);
     }
     load();
   }, []);
 
-  const filtered = SCENARIOS.filter((s) => s.level === level);
+  const filtered = scenarios.filter((s) => s.level_code === level);
 
   function showToast(message) {
     setToast(message);
@@ -252,9 +137,7 @@ export default function SpeakingPage() {
   async function finishExam() {
     setLoading(true);
 
-    const full = transcript
-      .map((t, i) => `س${i + 1}: ${t.q} — ج: ${t.a}`)
-      .join('\n');
+    const full = transcript.map((t, i) => `س${i + 1}: ${t.q} — ج: ${t.a}`).join('\n');
 
     try {
       const res = await fetch('/api/ai', {
@@ -319,7 +202,7 @@ export default function SpeakingPage() {
           <div className="card" style={{ marginBottom: 18 }}>
             <p className="muted" style={{ margin: 0, lineHeight: 2 }}>
               عِش أجواء الجزء الشفوي من امتحان Goethe: الممتحن ينطق السؤال بالألمانية 🔊،
-              وأنت تجيب **بصوتك** 🎙️ أو كتابة، مع تصحيح فوري وتقييم نهائي من 100.
+              وأنت تجيب بصوتك 🎙️ أو كتابة، مع تصحيح فوري وتقييم نهائي من 100.
             </p>
           </div>
 
@@ -341,9 +224,9 @@ export default function SpeakingPage() {
           </div>
 
           <div style={{ display: 'grid', gap: 12 }}>
-            {filtered.map((s, i) => (
+            {filtered.map((s) => (
               <div
-                key={i}
+                key={s.id}
                 className="card"
                 style={{
                   display: 'flex',
@@ -354,7 +237,7 @@ export default function SpeakingPage() {
                 }}
               >
                 <div>
-                  <div style={{ fontWeight: 800 }}>🗣️ {s.title}</div>
+                  <div style={{ fontWeight: 800 }}>🗣️ {s.title_ar}</div>
                   <span className="chip" style={{ marginTop: 6 }}>
                     {s.questions.length} أسئلة
                   </span>
@@ -369,12 +252,8 @@ export default function SpeakingPage() {
       ) : (
         <>
           <div className="page-head">
-            <h2 style={{ margin: 0, fontSize: 22, fontWeight: 900 }}>
-              🗣️ {scenario.title}
-            </h2>
-            <button className="btn btn-ghost" onClick={() => setScenario(null)}>
-              ← إنهاء
-            </button>
+            <h2 style={{ margin: 0, fontSize: 22, fontWeight: 900 }}>🗣️ {scenario.title_ar}</h2>
+            <button className="btn btn-ghost" onClick={() => setScenario(null)}>← إنهاء</button>
           </div>
 
           {!finalResult && (
@@ -393,11 +272,7 @@ export default function SpeakingPage() {
 
               <div className="card" style={{ marginBottom: 14 }}>
                 <div style={{ display: 'flex', gap: 10, marginBottom: 10, flexWrap: 'wrap' }}>
-                  <button
-                    className="btn btn-primary"
-                    onClick={startRec}
-                    disabled={recording}
-                  >
+                  <button className="btn btn-primary" onClick={startRec} disabled={recording}>
                     {recording ? '🎙️ يستمع...' : '🎙️ أجب بصوتك'}
                   </button>
                 </div>
