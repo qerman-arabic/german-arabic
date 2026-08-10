@@ -66,6 +66,21 @@ export default function DashboardPage() {
     );
   }
 
+  const features = [
+    { href: '/ai', icon: '🤖', title: 'المعلم الذكي', desc: 'اسأل وصحّح بالألمانية' },
+    { href: '/goethe', icon: '🎓', title: 'نماذج Goethe', desc: '60 نموذجًا بأسلوب الامتحان' },
+    { href: '/listening', icon: '🎧', title: 'الاستماع', desc: '60 مقطعًا بنبرتين' },
+    { href: '/reading', icon: '📖', title: 'القراءة', desc: '60 نصًا طويلًا بأسئلة' },
+    { href: '/writing', icon: '✍️', title: 'الكتابة', desc: 'مهام وتصحيح ذكي' },
+    { href: '/speaking', icon: '🗣️', title: 'الشفوي', desc: '60 سيناريو بالمايك' },
+    { href: '/grammar', icon: '📘', title: 'القواعد', desc: '96 قاعدة شاملة' },
+    { href: '/review', icon: '🧠', title: 'المراجعة الذكية', desc: 'تكرار متباعد للكلمات' },
+    { href: '/quiz', icon: '🎯', title: 'اختبار سريع', desc: 'أسئلة عشوائية فورية' },
+    { href: '/stats', icon: '📊', title: 'الإحصائيات', desc: 'تقدمك بالأرقام' },
+    { href: '/certificate', icon: '🏅', title: 'شهاداتي', desc: 'شهادات PDF باسمك' },
+    { href: '/profile', icon: '👤', title: 'حسابي', desc: 'الاسم والهدف اليومي' },
+  ];
+
   return (
     <main className="container">
       <div className="banner">
@@ -80,85 +95,108 @@ export default function DashboardPage() {
           </div>
           <div className="bstat">
             <b>{profile?.streak ?? 0}</b>
-            <span>أيام متتالية 🔥</span>
+            <span>أيام 🔥</span>
           </div>
+          <button className="pill pill-danger" onClick={handleLogout}>خروج</button>
         </div>
       </div>
 
-      <nav className="pills">
-        <a className="pill" href="/ai">المعلم الذكي 🤖</a>
-        <a className="pill" href="/goethe">نماذج Goethe 🎓</a>
-        <a className="pill" href="/listening">استماع 🎧</a>
-        <a className="pill" href="/writing">كتابة ✍️</a>
-        <a className="pill" href="/speaking">شفوي 🗣️</a>
-        <a className="pill" href="/reading">قراءة 📖</a>
-        <a className="pill" href="/grammar">القواعد 📘</a>
-        <a className="pill" href="/review">المراجعة 🧠</a>
-        <a className="pill" href="/quiz">اختبار سريع 🎯</a>
-        <a className="pill" href="/stats">الإحصائيات 📊</a>
-        <a className="pill" href="/certificate">شهاداتي 🎓</a>
-        <a className="pill" href="/profile">حسابي 👤</a>
+      {/* الميزات الكبيرة */}
+      <div
+        style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fill, minmax(170px, 1fr))',
+          gap: 14,
+          marginBottom: 26,
+        }}
+      >
+        {features.map((f) => (
+          <a
+            key={f.href}
+            href={f.href}
+            className="card"
+            style={{
+              textDecoration: 'none',
+              color: 'inherit',
+              textAlign: 'center',
+              padding: '22px 12px',
+              transition: 'transform .15s, box-shadow .15s',
+            }}
+          >
+            <div style={{ fontSize: 36, marginBottom: 8 }}>{f.icon}</div>
+            <div style={{ fontWeight: 900, fontSize: 17, marginBottom: 4 }}>{f.title}</div>
+            <div className="muted small">{f.desc}</div>
+          </a>
+        ))}
+
         {isAdmin && (
           <a
-            className="pill"
             href="/admin"
-            style={{ background: '#111827', color: '#fff', borderColor: '#111827' }}
+            className="card"
+            style={{
+              textDecoration: 'none',
+              color: '#fff',
+              background: '#111827',
+              textAlign: 'center',
+              padding: '22px 12px',
+            }}
           >
-            إدارة 🛠️
+            <div style={{ fontSize: 36, marginBottom: 8 }}>🛠️</div>
+            <div style={{ fontWeight: 900, fontSize: 17, marginBottom: 4 }}>الإدارة</div>
+            <div style={{ opacity: 0.7 }} className="small">إضافة محتوى</div>
           </a>
         )}
-        <button className="pill pill-danger" onClick={handleLogout}>خروج</button>
-      </nav>
+      </div>
 
-      {levels.map((level) => {
-        const allLessons = (level.modules || []).flatMap((m) => m.lessons || []);
-        const doneCount = allLessons.filter((l) => completedLessons.includes(l.id)).length;
-        const pct = allLessons.length
-          ? Math.round((doneCount / allLessons.length) * 100)
-          : 0;
+      {/* المستويات */}
+      <h2 className="section-title">مستويات التعلم 🇩</h2>
 
-        return (
-          <section key={level.id} className="card level-block">
-            <div className="level-head">
-              <div>
-                <h2>{level.name_ar}</h2>
-                <p className="muted small">{level.description_ar}</p>
-              </div>
-              <div className="level-badge">{level.code}</div>
-            </div>
+      <div style={{ display: 'grid', gap: 14 }}>
+        {levels.map((level) => {
+          const allLessons = (level.modules || []).flatMap((m) => m.lessons || []);
+          const doneCount = allLessons.filter((l) => completedLessons.includes(l.id)).length;
+          const pct = allLessons.length
+            ? Math.round((doneCount / allLessons.length) * 100)
+            : 0;
 
-            <div className="progress">
-              <div className="progress-fill" style={{ width: `${pct}%` }} />
-            </div>
-            <div className="muted small">
-              أكملت {doneCount} من {allLessons.length} درسًا ({pct}%)
-            </div>
-
-            {(level.modules || []).map((module) => (
-              <div key={module.id} className="module">
-                <h4>{module.title_ar}</h4>
-                <div className="lessons">
-                  {(module.lessons || []).map((lesson) => {
-                    const done = completedLessons.includes(lesson.id);
-
-                    return (
-                      <a
-                        key={lesson.id}
-                        className={`lesson ${done ? 'done' : ''}`}
-                        href={`/lesson/${lesson.id}`}
-                      >
-                        <span>{done ? '✅' : '📘'}</span>
-                        <span className="lesson-title">{lesson.title_ar}</span>
-                        <span className="lesson-cta">{done ? 'مكتمل' : 'ابدأ'}</span>
-                      </a>
-                    );
-                  })}
+          return (
+            <a
+              key={level.id}
+              href={`/level/${level.id}`}
+              className="card"
+              style={{ textDecoration: 'none', color: 'inherit' }}
+            >
+              <div
+                style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  gap: 12,
+                  flexWrap: 'wrap',
+                }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+                  <div className="level-badge">{level.code}</div>
+                  <div>
+                    <div style={{ fontWeight: 900, fontSize: 18 }}>{level.name_ar}</div>
+                    <div className="muted small">{level.description_ar}</div>
+                  </div>
+                </div>
+                <div style={{ textAlign: 'left' }}>
+                  <div style={{ fontWeight: 800, color: 'var(--primary-dark)' }}>{pct}%</div>
+                  <div className="muted small">
+                    {doneCount}/{allLessons.length} درسًا
+                  </div>
                 </div>
               </div>
-            ))}
-          </section>
-        );
-      })}
+
+              <div className="progress" style={{ marginTop: 12, marginBottom: 0 }}>
+                <div className="progress-fill" style={{ width: `${pct}%` }} />
+              </div>
+            </a>
+          );
+        })}
+      </div>
     </main>
   );
 }
