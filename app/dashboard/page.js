@@ -67,6 +67,7 @@ export default function DashboardPage() {
   }
 
   const features = [
+    { href: '/placement', icon: '🎯', title: 'حدد مستواك', desc: 'اختبار ذكي من 20 سؤالًا' },
     { href: '/ai', icon: '🤖', title: 'المعلم الذكي', desc: 'اسأل وصحّح بالألمانية' },
     { href: '/goethe', icon: '🎓', title: 'نماذج Goethe', desc: '60 نموذجًا بأسلوب الامتحان' },
     { href: '/listening', icon: '🎧', title: 'الاستماع', desc: '60 مقطعًا بنبرتين' },
