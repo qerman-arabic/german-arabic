@@ -6,39 +6,66 @@ import { supabase } from '../../../lib/supabase';
 export default function LevelPage({ params }) {
   const [level, setLevel] = useState(null);
   const [completed, setCompleted] = useState([]);
+  const [error, setError] = useState('');
 
   useEffect(() => {
     async function load() {
-      const { data } = await supabase.auth.getSession();
-      const session = data?.session;
+      try {
+        const { data } = await supabase.auth.getSession();
+        const session = data?.session;
 
-      if (!session) {
-        window.location.href = '/login';
-        return;
+        if (!session) {
+          window.location.href = '/login';
+          return;
+        }
+
+        const [levelRes, progressRes] = await Promise.all([
+          supabase
+            .from('levels')
+            .select('*, modules(*, lessons(*))')
+            .eq('id', params.id)
+            .maybeSingle(),
+          supabase
+            .from('lesson_progress')
+            .select('lesson_id, status')
+            .eq('user_id', session.user.id),
+        ]);
+
+        if (levelRes.error) {
+          setError('خطأ من القاعدة: ' + levelRes.error.message);
+          return;
+        }
+
+        if (!levelRes.data) {
+          setError('لم يتم العثور على هذا المستوى.');
+          return;
+        }
+
+        setLevel(levelRes.data);
+        setCompleted(
+          (progressRes.data || [])
+            .filter((p) => p.status === 'completed')
+            .map((p) => p.lesson_id)
+        );
+      } catch (e) {
+        setError('تعذر تحميل المستوى: ' + (e?.message || 'خطأ غير متوقع'));
       }
-
-      const [levelRes, progressRes] = await Promise.all([
-        supabase
-          .from('levels')
-          .select('*, modules(*, lessons(*))')
-          .eq('id', params.id)
-          .single(),
-        supabase
-          .from('lesson_progress')
-          .select('lesson_id, status')
-          .eq('user_id', session.user.id),
-      ]);
-
-      setLevel(levelRes.data);
-      setCompleted(
-        (progressRes.data || [])
-          .filter((p) => p.status === 'completed')
-          .map((p) => p.lesson_id)
-      );
     }
 
     load();
   }, [params.id]);
+
+  if (error) {
+    return (
+      <main className="container" style={{ textAlign: 'center', padding: 60 }}>
+        <div className="card" style={{ maxWidth: 480, margin: '0 auto' }}>
+          <div style={{ fontSize: 40, marginBottom: 10 }}>⚠️</div>
+          <p style={{ fontWeight: 800, marginBottom: 12 }}>{error}</p>
+          <a className="btn btn-primary" href="/dashboard">← العودة للوحة التعلم</a>
+        </div>
+      </main>
+    );
+  }
 
   if (!level) {
     return (
