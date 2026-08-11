@@ -12,6 +12,10 @@ const FEATURES = [
 
 export default function HomePage() {
   const [stats, setStats] = useState(null);
+  const [installEvt, setInstallEvt] = useState(null);
+  const [installed, setInstalled] = useState(false);
+  const [iosHint, setIosHint] = useState(false);
+  const [manualHint, setManualHint] = useState(false);
 
   useEffect(() => {
     async function count(table) {
@@ -36,7 +40,24 @@ export default function HomePage() {
       setStats({ lessons, words, grammar, listening, speaking, writing, reading });
     }
 
+    function onPrompt(e) {
+      e.preventDefault();
+      setInstallEvt(e);
+    }
+
+    function onInstalled() {
+      setInstalled(true);
+      setInstallEvt(null);
+    }
+
+    window.addEventListener('beforeinstallprompt', onPrompt);
+    window.addEventListener('appinstalled', onInstalled);
     load();
+
+    return () => {
+      window.removeEventListener('beforeinstallprompt', onPrompt);
+      window.removeEventListener('appinstalled', onInstalled);
+    };
   }, []);
 
   const items = stats
@@ -61,6 +82,17 @@ export default function HomePage() {
       stats.writing +
       stats.reading
     : 0;
+
+  function handleInstall() {
+    if (installEvt) {
+      installEvt.prompt();
+      return;
+    }
+
+    const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+    if (isIOS) setIosHint(true);
+    else setManualHint(true);
+  }
 
   return (
     <main>
@@ -93,10 +125,47 @@ export default function HomePage() {
           دروس مترابطة، مفردات، قواعد شاملة، واستماع وقراءة وكتابة وشفوي بأسلوب
           الامتحان، ومعلم ذكاء اصطناعي يصحح لك — في مكان واحد.
         </p>
+
         <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
           <a className="btn btn-primary btn-lg" href="/register">ابدأ التعلم مجانًا</a>
           <a className="btn btn-ghost btn-lg" href="/login">لديّ حساب بالفعل</a>
+          {!installed ? (
+            <button
+              className="btn btn-lg"
+              style={{ background: '#111827', color: '#fff' }}
+              onClick={handleInstall}
+            >
+              📲 ثبّت التطبيق
+            </button>
+          ) : (
+            <span className="chip" style={{ background: '#dcfce7', color: '#166534' }}>
+              ✅ التطبيق مثبت على جهازك
+            </span>
+          )}
         </div>
+
+        {iosHint && (
+          <div className="card" style={{ maxWidth: 480, margin: '18px auto 0', textAlign: 'right' }}>
+            <b>📱 التثبيت على آيفون:</b>
+            <ol style={{ margin: '8px 0 0', lineHeight: 2.1, paddingLeft: 18 }}>
+              <li>افتح الموقع في متصفح <b>Safari</b>.</li>
+              <li>اضغط زر المشاركة ⬆️ أسفل الشاشة.</li>
+              <li>اختر «إضافة إلى الشاشة الرئيسية».</li>
+              <li>اضغط «إضافة» وستظهر الأيقونة على شاشتك.</li>
+            </ol>
+          </div>
+        )}
+
+        {manualHint && (
+          <div className="card" style={{ maxWidth: 480, margin: '18px auto 0', textAlign: 'right' }}>
+            <b>📲 التثبيت اليدوي:</b>
+            <ol style={{ margin: '8px 0 0', lineHeight: 2.1, paddingLeft: 18 }}>
+              <li>افتح قائمة المتصفح ⋮ أعلى الشاشة.</li>
+              <li>اختر «تثبيت التطبيق» أو «إضافة إلى الشاشة الرئيسية».</li>
+              <li>ستظهر أيقونة المنصة على جهازك.</li>
+            </ol>
+          </div>
+        )}
       </section>
 
       <section className="container" style={{ padding: '20px 0' }}>
