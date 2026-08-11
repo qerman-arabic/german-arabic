@@ -16,7 +16,6 @@ self.addEventListener('fetch', (e) => {
   const url = new URL(e.request.url);
   if (e.request.method !== 'GET' || url.origin !== location.origin) return;
 
-  // الصفحات: الشبكة أولًا ثم الكاش عند انقطاع الإنترنت
   if (e.request.mode === 'navigate') {
     e.respondWith(
       fetch(e.request)
@@ -30,7 +29,6 @@ self.addEventListener('fetch', (e) => {
     return;
   }
 
-  // الملفات الثابتة: الكاش أولًا لسرعة أعلى
   e.respondWith(
     caches.match(e.request).then(
       (cached) =>
