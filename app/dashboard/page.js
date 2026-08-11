@@ -122,6 +122,7 @@ export default function DashboardPage() {
     { href: '/quiz', icon: '🎯', title: 'اختبار سريع', desc: 'يغذي قاموس أخطائك' },
     { href: '/mistakes', icon: '📕', title: 'قاموس أخطائك', desc: 'كلماتك الضعيفة تتجمع هنا' },
     { href: '/analysis', icon: '📈', title: 'تحليل الأخطاء', desc: 'اكتشف نمط ضعفك' },
+    { href: '/lid', icon: '🇩', title: 'الحياة في ألمانيا', desc: 'اختبار التجنيس والإقامة' },
     { href: '/review', icon: '🧠', title: 'المراجعة الذكية', desc: 'تكرار متباعد للكلمات' },
     { href: '/stats', icon: '📊', title: 'الإحصائيات', desc: 'تقدمك بالأرقام' },
     { href: '/certificate', icon: '🏅', title: 'شهاداتي', desc: 'شهادات PDF باسمك' },
