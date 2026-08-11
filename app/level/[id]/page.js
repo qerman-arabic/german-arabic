@@ -3,12 +3,23 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '../../../lib/supabase';
 
-export default function LevelPage({ params }) {
+export default function LevelPage() {
+  const [routeId, setRouteId] = useState('');
+  useEffect(() => {
+    setRouteId(window.location.pathname.split('/').pop());
+  }, []);
+  const [id, setId] = useState('');
   const [level, setLevel] = useState(null);
   const [completed, setCompleted] = useState([]);
   const [error, setError] = useState('');
 
   useEffect(() => {
+    setId(window.location.pathname.split('/').pop());
+  }, []);
+
+  useEffect(() => {
+    if (!id) return;
+
     async function load() {
       try {
         const { data } = await supabase.auth.getSession();
@@ -23,7 +34,7 @@ export default function LevelPage({ params }) {
           supabase
             .from('levels')
             .select('*, modules(*, lessons(*))')
-            .eq('id', params.id)
+            .eq('id', id)
             .maybeSingle(),
           supabase
             .from('lesson_progress')
@@ -53,7 +64,7 @@ export default function LevelPage({ params }) {
     }
 
     load();
-  }, [params.id]);
+  }, [id]);
 
   if (error) {
     return (
