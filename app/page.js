@@ -105,7 +105,29 @@ export default function HomePage() {
           padding: '18px 0',
         }}
       >
-        <div style={{ fontWeight: 900, fontSize: 20 }}>🇩 German بالعربي</div>
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 10,
+            fontWeight: 900,
+            fontSize: 20,
+          }}
+        >
+          <img
+            src="/logo.png"
+            alt="شعار المنصة"
+            style={{
+              width: 44,
+              height: 44,
+              objectFit: 'cover',
+              objectPosition: 'center',
+              borderRadius: 12,
+              boxShadow: '0 2px 8px rgba(15,118,110,.35)',
+            }}
+          />
+          German بالعربي
+        </div>
         <div style={{ display: 'flex', gap: 10 }}>
           <a className="btn btn-ghost" href="/login">تسجيل الدخول</a>
           <a className="btn btn-primary" href="/register">إنشاء حساب</a>
