@@ -74,6 +74,7 @@ export default function WritingPage() {
 
   return (
     <main className="container">
+          <Upsell role={role} feature="الكتابة" />
       <div className="page-head">
         <h1 className="page-title">مدرسة الكتابة ✍️</h1>
         <a className="btn btn-ghost" href="/dashboard">← لوحة التعلم</a>
@@ -106,7 +107,7 @@ export default function WritingPage() {
           </div>
 
           <div style={{ display: 'grid', gap: 12 }}>
-            {filtered.map((t) => (
+            {          {filtered.slice(0, LIMITS[role].writing).map((t) => (
               <div
                 key={t.id}
                 className="card"
@@ -128,7 +129,8 @@ export default function WritingPage() {
         </>
       ) : (
         <>
-          <div className="page-head">
+                   <Upsell role={role} feature="الكتابة" /> 
+<div className="page-head">
             <h2 style={{ margin: 0, fontSize: 22, fontWeight: 900 }}>{current.title_ar}</h2>
             <button className="btn btn-ghost" onClick={() => setCurrent(null)}>
               ← كل المهام

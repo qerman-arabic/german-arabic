@@ -192,7 +192,8 @@ export default function SpeakingPage() {
 
   return (
     <main className="container">
-      <div className="page-head">
+               <Upsell role={role} feature="الشفوي" />
+        <div className="page-head">
         <h1 className="page-title">محاكي الامتحان الشفوي 🗣️</h1>
         <a className="btn btn-ghost" href="/dashboard">← لوحة التعلم</a>
       </div>
@@ -224,7 +225,7 @@ export default function SpeakingPage() {
           </div>
 
           <div style={{ display: 'grid', gap: 12 }}>
-            {filtered.map((s) => (
+            {filtered.slice(0, LIMITS[role].speaking).map((s) => (
               <div
                 key={s.id}
                 className="card"

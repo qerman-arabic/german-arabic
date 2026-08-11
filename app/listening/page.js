@@ -170,6 +170,7 @@ export default function ListeningPage() {
 
   return (
     <main className="container">
+          <Upsell role={role} feature="الاستماع" />
       <div className="page-head">
         <h1 className="page-title">الاستماع الحقيقي 🎧</h1>
         <a className="btn btn-ghost" href="/dashboard">← لوحة التعلم</a>
@@ -203,7 +204,7 @@ export default function ListeningPage() {
           </div>
 
           <div style={{ display: 'grid', gap: 12 }}>
-            {filtered.map((ex) => (
+            {filtered.slice(0, LIMITS[role].listening).map((ex) => (
               <div
                 key={ex.id}
                 className="card"

@@ -62,7 +62,7 @@ export default function GrammarPage() {
         </div>
       )}
 
-      {filtered.map((topic) => {
+      {          {filtered.slice(0, LIMITS[role].grammar).map((topic) => {
         const deList = (topic.examples_de || '').split(' / ');
         const arList = (topic.examples_ar || '').split(' / ');
 

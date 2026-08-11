@@ -138,6 +138,7 @@ export default function ReadingPage() {
 
   return (
     <main className="container">
+          <Upsell role={role} feature="القراءة" />
       <div className="page-head">
         <h1 className="page-title">القراءة والاستماع 📖</h1>
         <a className="btn btn-ghost" href="/dashboard">← لوحة التعلم</a>
@@ -176,7 +177,7 @@ export default function ReadingPage() {
           </div>
 
           <div style={{ display: 'grid', gap: 12 }}>
-            {filtered.map((t) => (
+            {filtered.slice(0, LIMITS[role].reading).map((t) => (
               <div
                 key={t.id}
                 className="card"
