@@ -77,6 +77,7 @@ export default function DashboardPage() {
     { href: '/grammar', icon: '📘', title: 'القواعد', desc: '96 قاعدة شاملة' },
     { href: '/review', icon: '🧠', title: 'المراجعة الذكية', desc: 'تكرار متباعد للكلمات' },
     { href: '/quiz', icon: '🎯', title: 'اختبار سريع', desc: 'أسئلة عشوائية فورية' },
+    { href: '/mistakes', icon: '📕', title: 'قاموس أخطائك', desc: 'كلماتك الضعيفة تتجمع هنا' },
     { href: '/stats', icon: '📊', title: 'الإحصائيات', desc: 'تقدمك بالأرقام' },
     { href: '/certificate', icon: '🏅', title: 'شهاداتي', desc: 'شهادات PDF باسمك' },
     { href: '/profile', icon: '👤', title: 'حسابي', desc: 'الاسم والهدف اليومي' },
