@@ -1,6 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-  <rect width="512" height="512" rx="110" fill="#0f766e"/>
-  <circle cx="256" cy="256" r="150" fill="#10b981" opacity="0.35"/>
-  <text x="256" y="230" font-size="140" text-anchor="middle">🇩</text>
-  <text x="256" y="400" font-size="110" text-anchor="middle" fill="#ffffff" font-family="Tahoma, Arial, sans-serif" font-weight="bold">ع</text>
-</svg>
