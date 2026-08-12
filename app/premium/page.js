@@ -1,11 +1,10 @@
 'use client';
 
 import { useRole } from '../../lib/access';
-
 const PLANS = [
-  { name: 'شهر امتحان', price: '10$', per: 'لمدة 30 يومًا', hot: false },
-  { name: '3 أشهر', price: '20$', per: 'الأكثر اختيارًا', hot: true },
-  { name: 'وصول دائم', price: '29$', per: 'ادفع مرة واحدة', hot: false },
+  { name: 'شهر امتحان', price: '15$', per: 'لمدة 30 يومًا', hot: false },
+  { name: '3 أشهر', price: '30$', per: 'الأكثر اختيارًا — 10$/شهر', hot: true },
+  { name: 'وصول دائم', price: '50$', per: 'ادفع مرة واحدة للأبد', hot: false },
 ];
 
 export default function PremiumPage() {
@@ -26,6 +25,15 @@ export default function PremiumPage() {
 
       <div className="card" style={{ marginBottom: 18, lineHeight: 2 }}>
         <b>ماذا يفتح Premium؟</b>
+      <div className="card" style={{ background: '#eff6ff', marginBottom: 18, lineHeight: 2 }}>
+        <b>📊 لماذا منصتنا الصفقة الأفضل؟</b>
+        <ul style={{ margin: '8px 0 0', paddingLeft: 18 }}>
+          <li>دورة Goethe رسمية في المعهد = <s>400$ إلى 1000$</s></li>
+          <li>دورة خاصة + كتب + سفر = <s>500$+</s></li>
+          <li>امتحان Goethe الواحد = <s>100$ إلى 200$</s></li>
+          <li>منصتنا — كل شيء معًا = <b style={{color:'#16a34a'}}>50$ فقط للأبد ✅</b></li>
+        </ul>
+      </div>
         <ul style={{ margin: '8px 0 0', paddingLeft: 18 }}>
           <li>60 نموذج Goethe كاملًا (بدل 5 لكل مستوى)</li>
           <li>كل مقاطع الاستماع والقراءة والشفوي والكتابة</li>
@@ -71,16 +79,15 @@ export default function PremiumPage() {
         <ol style={{ margin: '8px 0 0', paddingLeft: 18 }}>
           <li>حوّل المبلغ عبر أحد الطرق بالأسفل.</li>
           <li>أرسل صورة الإيصال مع بريدك الإلكتروني المسجل في المنصة.</li>
-          <li>يُفعَّل اشتراكك خلال أقل من 24 ساعة.</li>
-        </ol>        <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginTop: 14 }}>
-          <a className="btn btn-primary btn-lg" href="https://paypal.me/germanarabic/10" target="_blank" rel="noreferrer">
-            💙 ادفع 10$ — شهر امتحان
+          <li>يُفعَّل اشتراكك خلال أقل من 24 ساعة.</li>        <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginTop: 14 }}>
+          <a className="btn btn-primary btn-lg" href="https://paypal.me/germanarabic/15" target="_blank" rel="noreferrer">
+            💙 ادفع 15$ — شهر امتحان
           </a>
-          <a className="btn btn-primary btn-lg" href="https://paypal.me/germanarabic/20" target="_blank" rel="noreferrer">
-            💙 ادفع 20$ — 3 أشهر
+          <a className="btn btn-primary btn-lg" href="https://paypal.me/germanarabic/30" target="_blank" rel="noreferrer">
+            💙 ادفع 30$ — 3 أشهر
           </a>
-          <a className="btn btn-primary btn-lg" href="https://paypal.me/germanarabic/29" target="_blank" rel="noreferrer">
-            💙 ادفع 29$ — وصول دائم
+          <a className="btn btn-primary btn-lg" href="https://paypal.me/germanarabic/50" target="_blank" rel="noreferrer">
+            💙 ادفع 50$ — وصول دائم
           </a>
         </div>
         <p className="muted small" style={{ marginTop: 10 }}>
