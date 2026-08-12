@@ -151,6 +151,13 @@ export default function HomePage() {
         <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
           <a className="btn btn-primary btn-lg" href="/register">ابدأ التعلم مجانًا</a>
           <a className="btn btn-ghost btn-lg" href="/login">لديّ حساب بالفعل</a>
+          <a
+            className="btn btn-lg"
+            style={{ background: '#f1f5f9', color: '#111827' }}
+            href="/reading"
+          >
+            👀 تصفح بدون حساب
+          </a>
           {!installed ? (
             <button
               className="btn btn-lg"
