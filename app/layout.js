@@ -1,6 +1,8 @@
 import Script from 'next/script';
 import './globals.css';
 
+import AdminLink from '../components/AdminLink';
+
 export const metadata = {
   title: 'German بالعربي — تعلّم الألمانية',
   description: 'منصة عربية متكاملة للتحضير لامتحان Goethe من A1 حتى B2',
@@ -30,6 +32,7 @@ export default function RootLayout({ children }) {
       </head>
       <body>
         {children}
+        <AdminLink />
 
         {/* تسجيل عامل الخدمة للتطبيق */}
         <Script id="sw-register" strategy="afterInteractive">

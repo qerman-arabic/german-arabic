@@ -8,6 +8,7 @@ const ADMIN_EMAIL = 'moayad.ahmad2014@gmail.com';
 export default function PremiumAdminPage() {
   const [users, setUsers] = useState([]);
   const [allowed, setAllowed] = useState(false);
+  const [error, setError] = useState('');
 
   useEffect(() => {
     async function load() {
@@ -20,13 +21,20 @@ export default function PremiumAdminPage() {
       }
 
       setAllowed(true);
-      const { data: rows } = await supabase
+
+      const { data: rows, error: err } = await supabase
         .from('profiles')
-        .select('id, full_name, email, points, is_premium')
+        .select('*')
         .order('points', { ascending: false });
+
+      if (err) {
+        setError(err.message);
+        return;
+      }
 
       setUsers(rows || []);
     }
+
     load();
   }, []);
 
@@ -58,6 +66,16 @@ export default function PremiumAdminPage() {
         <a className="btn btn-ghost" href="/dashboard">← لوحة التعلم</a>
       </div>
 
+      {error && (
+        <div className="card" style={{ background: '#fef2f2', color: '#b91c1c', marginBottom: 14 }}>
+          خطأ: {error}
+        </div>
+      )}
+
+      <p className="muted small" style={{ marginBottom: 14 }}>
+        عدد المستخدمين: {users.length}
+      </p>
+
       <div style={{ display: 'grid', gap: 10 }}>
         {users.map((u) => (
           <div
@@ -72,8 +90,10 @@ export default function PremiumAdminPage() {
             }}
           >
             <div>
-              <b>{u.full_name || u.email}</b>
-              <div className="muted small">{u.email} — {u.points} نقطة</div>
+              <b>{u.email || u.full_name || 'مستخدم'}</b>
+              <div className="muted small">
+                {u.full_name || ''} — {u.points || 0} نقطة
+              </div>
             </div>
             <button
               className="btn"
