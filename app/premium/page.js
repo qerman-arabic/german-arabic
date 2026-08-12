@@ -41,8 +41,8 @@ export default function PremiumPage() {
           <li>دورة خاصة + كتب + سفر = 500$ وأكثر</li>
           <li>امتحان Goethe الواحد = 100$ إلى 200$</li>
           <li>
-            منصتنا — كل شيء معًا ={' '}  
-          <b style={{ color: '#16a34a' }}>200$ فقط للأبد ✅</b>
+            منصتنا — كل شيء معًا للأبد ={' '}
+            <b style={{ color: '#16a34a' }}>200$ فقط ✅</b>
           </li>
         </ul>
       </div>
@@ -87,6 +87,14 @@ export default function PremiumPage() {
           </div>
         ))}
       </div>
+
+      <div className="card" style={{ lineHeight: 2.1 }}>
+        <b>🛒 طريقة الاشتراك:</b>
+        <ol style={{ margin: '8px 0 0', paddingLeft: 18 }}>
+          <li>اضغط زر الباقة المناسبة — سيتم تحويلك إلى PayPal.</li>
+          <li>أرسل صورة الإيصال مع بريدك الإلكتروني المسجل في المنصة.</li>
+          <li>يُفعَّل اشتراكك خلال أقل من 24 ساعة.</li>
+        </ol>
 
         <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginTop: 14 }}>
           <a className="btn btn-primary btn-lg" href="https://paypal.me/germanarabic/20" target="_blank" rel="noreferrer">
