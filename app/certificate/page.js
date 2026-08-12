@@ -4,11 +4,19 @@ import { useEffect, useState } from 'react';
 import { supabase } from '../../lib/supabase';
 import { useRole } from '../../lib/access';
 
+const GERMAN_WISHES = {
+  A1: '„Herzlichen Glückwunsch! Dein erster Schritt ist geschafft!"',
+  A2: '„Weiter so! Du wirst immer besser!"',
+  B1: '„Toll gemacht! Dein Fleiß hat sich gelohnt!"',
+  B2: '„Wir sind stolz auf dich!"',
+};
+
 export default function CertificatePage() {
   const { role, userId, profile } = useRole();
   const [levels, setLevels] = useState([]);
   const [completed, setCompleted] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [printId, setPrintId] = useState(null);
 
   useEffect(() => {
     async function load() {
@@ -37,6 +45,14 @@ export default function CertificatePage() {
 
     load();
   }, [userId]);
+
+  function printCert(id) {
+    setPrintId(id);
+    setTimeout(() => {
+      window.print();
+      setPrintId(null);
+    }, 150);
+  }
 
   if (role === 'guest') {
     return (
@@ -92,6 +108,14 @@ export default function CertificatePage() {
 
   return (
     <main className="container">
+      <style>{`
+        @media print {
+          body * { visibility: hidden; }
+          .cert-active, .cert-active * { visibility: visible; }
+          .cert-active { position: absolute; inset: 0; margin: 0; }
+        }
+      `}</style>
+
       <div className="page-head">
         <h1 className="page-title">شهاداتي 🏅</h1>
         <a className="btn btn-ghost" href="/dashboard">← لوحة التعلم</a>
@@ -99,40 +123,148 @@ export default function CertificatePage() {
 
       {certs.length === 0 && (
         <div className="card" style={{ textAlign: 'center' }}>
-          <div style={{ fontSize: 44, marginBottom: 10 }}></div>
+          <div style={{ fontSize: 44, marginBottom: 10 }}>🏅</div>
           <p style={{ fontWeight: 800 }}>
             لم تكمل أي مستوى بعد — أكمل كل دروس المستوى لتحصل على شهادته.
           </p>
         </div>
       )}
 
-      {certs.map((c) => (
-        <div
-          key={c.level.id}
-          className="card"
-          style={{
-            textAlign: 'center',
-            border: '3px double var(--primary)',
-            padding: 30,
-            marginBottom: 16,
-          }}
-        >
-          <div style={{ fontSize: 40, marginBottom: 6 }}>🏅</div>
-          <div className="muted small">شهادة إتمام</div>
-          <h2 style={{ fontSize: 26, fontWeight: 900, margin: '8px 0' }}>
-            {profile?.full_name || 'متعلم متميز'}
-          </h2>
-          <p style={{ marginBottom: 4 }}>أتمّ بنجاح جميع دروس مستوى</p>
-          <div className="level-badge" style={{ margin: '0 auto 10px' }}>{c.level.code}</div>
-          <p className="muted small">
-            {c.done} درسًا — German بالعربي —{' '}
-            {new Date().toLocaleDateString('ar-EG')}
-          </p>
-          <button className="btn btn-primary" style={{ marginTop: 14 }} onClick={() => window.print()}>
-            🖨️ طباعة / حفظ PDF
-          </button>
-        </div>
-      ))}
+      {certs.map((c) => {
+        const certNo = `GA-${c.level.code}-${new Date().getFullYear()}-${(userId || '')
+          .slice(0, 4)
+          .toUpperCase()}`;
+
+        return (
+          <div key={c.level.id}>
+            <div
+              className={printId === c.level.id ? 'cert-active' : ''}
+              style={{
+                background: 'linear-gradient(135deg,#0f766e,#10b981)',
+                borderRadius: 26,
+                padding: 8,
+                marginBottom: 14,
+              }}
+            >
+              <div
+                style={{
+                  background: '#fff',
+                  borderRadius: 20,
+                  padding: '34px 26px',
+                  textAlign: 'center',
+                }}
+              >
+                <div
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: 12,
+                    marginBottom: 6,
+                  }}
+                >
+                  <img
+                    src="/logo.png"
+                    alt="شعار المنصة"
+                    width={64}
+                    height={64}
+                    style={{ borderRadius: 14 }}
+                  />
+                  <b style={{ fontSize: 22, color: '#0f766e' }}>German بالعربي</b>
+                </div>
+
+                <div className="muted small">شهادة إتمام • Zertifikat</div>
+
+                <div
+                  style={{
+                    fontFamily: 'Georgia, serif',
+                    fontStyle: 'italic',
+                    fontSize: 21,
+                    color: '#0f766e',
+                    margin: '12px 0 4px',
+                  }}
+                >
+                  {GERMAN_WISHES[c.level.code] || GERMAN_WISHES.A1}
+                </div>
+
+                <h2 style={{ fontSize: 30, fontWeight: 900, color: '#0f172a', margin: '10px 0' }}>
+                  {profile?.full_name || 'متعلم متميز'}
+                </h2>
+
+                <p style={{ marginBottom: 8 }}>أتمّ بنجاح جميع دروس مستوى</p>
+
+                <div
+                  className="level-badge"
+                  style={{ margin: '0 auto 12px', width: 64, height: 64, fontSize: 22 }}
+                >
+                  {c.level.code}
+                </div>
+
+                <p className="muted small">
+                  {c.done} درسًا — {new Date().toLocaleDateString('ar-EG')}
+                </p>
+
+                <div
+                  style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'flex-end',
+                    marginTop: 24,
+                    gap: 10,
+                    flexWrap: 'wrap',
+                  }}
+                >
+                  <div style={{ textAlign: 'right' }}>
+                    <div
+                      style={{
+                        fontFamily: 'Georgia, serif',
+                        fontStyle: 'italic',
+                        fontWeight: 700,
+                        color: '#0f766e',
+                      }}
+                    >
+                      إدارة German بالعربي
+                    </div>
+                    <div className="muted small">التوقيع الرسمي</div>
+                  </div>
+
+                  <div className="muted small" style={{ direction: 'ltr' }}>
+                    رقم الشهادة: {certNo}
+                  </div>
+
+                  <img
+                    src="https://api.qrserver.com/v1/create-qr-code/?size=80x80&data=https://german-arabic.vercel.app/"
+                    width={80}
+                    height={80}
+                    style={{ borderRadius: 8 }}
+                    alt="QR"
+                  />
+                </div>
+
+                <div
+                  style={{
+                    display: 'flex',
+                    height: 8,
+                    marginTop: 24,
+                    borderRadius: 4,
+                    overflow: 'hidden',
+                  }}
+                >
+                  <div style={{ flex: 1, background: '#000' }} />
+                  <div style={{ flex: 1, background: '#DD0000' }} />
+                  <div style={{ flex: 1, background: '#FFCE00' }} />
+                </div>
+              </div>
+            </div>
+
+            <div style={{ textAlign: 'center', marginBottom: 26 }}>
+              <button className="btn btn-primary" onClick={() => printCert(c.level.id)}>
+                🖨️ طباعة / حفظ PDF
+              </button>
+            </div>
+          </div>
+        );
+      })}
     </main>
   );
 }
