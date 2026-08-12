@@ -1,6 +1,8 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import html2canvas from 'html2canvas';
+import { jsPDF } from 'jspdf';
 import { supabase } from '../../lib/supabase';
 import { useRole } from '../../lib/access';
 
@@ -16,7 +18,7 @@ export default function CertificatePage() {
   const [levels, setLevels] = useState([]);
   const [completed, setCompleted] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [printId, setPrintId] = useState(null);
+  const [downloading, setDownloading] = useState(null);
 
   useEffect(() => {
     async function load() {
@@ -46,12 +48,28 @@ export default function CertificatePage() {
     load();
   }, [userId]);
 
-  function printCert(id) {
-    setPrintId(id);
-    setTimeout(() => {
-      window.print();
-      setPrintId(null);
-    }, 150);
+  async function downloadPdf(id, code) {
+    setDownloading(id);
+    try {
+      const el = document.getElementById('cert-' + id);
+      const canvas = await html2canvas(el, {
+        scale: 2,
+        useCORS: true,
+        backgroundColor: '#0b3d39',
+      });
+
+      const img = canvas.toDataURL('image/png');
+      const pdf = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
+
+      const w = 277;
+      const h = (canvas.height * w) / canvas.width;
+      const y = (210 - h) / 2;
+
+      pdf.addImage(img, 'PNG', 10, y > 0 ? y : 10, w, h);
+      pdf.save(`شهادة-${code}.pdf`);
+    } finally {
+      setDownloading(null);
+    }
   }
 
   if (role === 'guest') {
@@ -108,14 +126,6 @@ export default function CertificatePage() {
 
   return (
     <main className="container">
-      <style>{`
-        @media print {
-          body * { visibility: hidden; }
-          .cert-active, .cert-active * { visibility: visible; }
-          .cert-active { position: absolute; inset: 0; margin: 0; }
-        }
-      `}</style>
-
       <div className="page-head">
         <h1 className="page-title">شهاداتي 🏅</h1>
         <a className="btn btn-ghost" href="/dashboard">← لوحة التعلم</a>
@@ -138,7 +148,7 @@ export default function CertificatePage() {
         return (
           <div key={c.level.id}>
             <div
-              className={printId === c.level.id ? 'cert-active' : ''}
+              id={'cert-' + c.level.id}
               style={{
                 background: 'linear-gradient(135deg,#FFCE00,#f59e0b)',
                 borderRadius: 26,
@@ -253,6 +263,7 @@ export default function CertificatePage() {
                     src="https://api.qrserver.com/v1/create-qr-code/?size=80x80&data=https://german-arabic.vercel.app/"
                     width={80}
                     height={80}
+                    crossOrigin="anonymous"
                     style={{ borderRadius: 8, background: '#fff', padding: 6 }}
                     alt="QR"
                   />
@@ -275,8 +286,12 @@ export default function CertificatePage() {
             </div>
 
             <div style={{ textAlign: 'center', marginBottom: 26 }}>
-              <button className="btn btn-primary" onClick={() => printCert(c.level.id)}>
-                🖨️ طباعة / حفظ PDF
+              <button
+                className="btn btn-primary"
+                disabled={downloading === c.level.id}
+                onClick={() => downloadPdf(c.level.id, c.level.code)}
+              >
+                {downloading === c.level.id ? '⏳ جارٍ التحضير...' : '⬇️ تحميل PDF'}
               </button>
             </div>
           </div>
