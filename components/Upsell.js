@@ -9,6 +9,9 @@ export default function Upsell({ role, feature }) {
           أنشئ حسابًا مجانيًا لفتح كل الدروس والمزيد من التدريبات في كل ميزة.
         </p>
         <a className="btn btn-primary" href="/register">إنشاء حساب مجاني</a>
+        <a className="btn btn-ghost" href="/explore" style={{ marginTop: 8 }}>
+          🧭 تصفح كل الأقسام
+        </a>
       </div>
     );
   }

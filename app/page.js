@@ -154,7 +154,7 @@ export default function HomePage() {
           <a
             className="btn btn-lg"
             style={{ background: '#f1f5f9', color: '#111827' }}
-            href="/reading"
+            href="/explore"
           >
             👀 تصفح بدون حساب
           </a>
