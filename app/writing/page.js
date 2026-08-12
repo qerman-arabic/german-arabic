@@ -1,5 +1,8 @@
 'use client';
 
+import { useRole, LIMITS } from '../../lib/access';
+import Upsell from '../../components/Upsell';
+
 import { useState, useEffect } from 'react';
 import { supabase } from '../../lib/supabase';
 
