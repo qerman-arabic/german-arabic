@@ -224,9 +224,14 @@ export default function CertificatePage() {
                 >
                   {c.level.code}
                 </div>
+                <p style={{ color: 'rgba(255,255,255,.9)', fontSize: 14, marginBottom: 6 }}>
+                  متضمنًا مهارات: الاستماع، القراءة، الكتابة، الشفوي، والقواعد
+                </p>
 
                 <p style={{ color: 'rgba(255,255,255,.75)', fontSize: 13 }}>
                   {c.done} درسًا — {new Date().toLocaleDateString('ar-EG')}
+                </p>
+
                 </p>
 
                 <div
