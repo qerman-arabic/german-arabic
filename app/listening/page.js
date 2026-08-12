@@ -2,96 +2,49 @@
 
 import { useEffect, useState } from 'react';
 import { supabase } from '../../lib/supabase';
-
-const kindIcon = {
-  'إعلان': '📢',
-  'حوار': '🗣️',
-  'رسالة صوتية': '📞',
-  'مكالمة هاتفية': '📞',
-  'نشرة': '🌦️',
-  'خبر': '📰',
-  'نقاش': '⚖️',
-  'محاضرة': '🎓',
-  'تقرير': '🌍',
-};
+import { useRole, LIMITS } from '../../lib/access';
+import Upsell from '../../components/Upsell';
 
 export default function ListeningPage() {
-  const [userId, setUserId] = useState(null);
+  const { role, userId } = useRole();
   const [exercises, setExercises] = useState([]);
-  const [done, setDone] = useState({});
   const [level, setLevel] = useState('A1');
   const [current, setCurrent] = useState(null);
   const [answers, setAnswers] = useState({});
   const [submitted, setSubmitted] = useState(false);
   const [result, setResult] = useState(null);
-  const [playing, setPlaying] = useState(false);
+  const [playing, setPlaying] = useState('');
   const [toast, setToast] = useState('');
 
   useEffect(() => {
     async function load() {
-      const { data } = await supabase.auth.getSession();
-      const session = data?.session;
-
-      if (session) {
-        setUserId(session.user.id);
-        const { data: prog } = await supabase
-          .from('listening_progress')
-          .select('*')
-          .eq('user_id', session.user.id);
-
-        const map = {};
-        (prog || []).forEach((p) => (map[p.exercise_id] = p.score));
-        setDone(map);
-      }
-
-      const { data: ex } = await supabase
+      const { data } = await supabase
         .from('listening_exercises')
         .select('*')
         .order('sort_order');
 
-      setExercises(ex || []);
+      setExercises(data || []);
     }
-
     load();
   }, []);
 
   const filtered = exercises.filter((e) => e.level_code === level);
+  const visible = filtered.slice(0, LIMITS[role].listening);
 
-  function showToast(message) {
-    setToast(message);
-    setTimeout(() => setToast(''), 2500);
-  }
+  function play(text, speed) {
+    if (!('speechSynthesis' in window)) return;
+    window.speechSynthesis.cancel();
 
-  function stopAudio() {
-    if ('speechSynthesis' in window) window.speechSynthesis.cancel();
-    setPlaying(false);
-  }
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang = 'de-DE';
+    u.rate = speed === 'slow' ? 0.6 : 0.95;
 
-  function play(ex) {
-    if (!('speechSynthesis' in window)) {
-      showToast('المتصفح لا يدعم النطق الصوتي');
-      return;
-    }
-
-    stopAudio();
-
-    const lines = Array.isArray(ex.script) ? ex.script : [];
-    lines.forEach((line) => {
-      const u = new SpeechSynthesisUtterance(line.t);
-      u.lang = 'de-DE';
-      u.rate = 0.95;
-      u.pitch = line.s === 2 ? 0.7 : line.s === 3 ? 1.3 : 1;
-      window.speechSynthesis.speak(u);
-    });
-
-    const end = new SpeechSynthesisUtterance(' ');
-    end.onend = () => setPlaying(false);
-    window.speechSynthesis.speak(end);
-    setPlaying(true);
+    setPlaying(speed);
+    u.onend = () => setPlaying('');
+    window.speechSynthesis.speak(u);
   }
 
   function open(ex) {
-    stopAudio();
     setCurrent(ex);
     setAnswers({});
     setSubmitted(false);
@@ -104,89 +57,41 @@ export default function ListeningPage() {
   }
 
   async function submit() {
-    if (submitted) return;
+    const qs = current.questions || [];
+    const correct = qs.filter((q, i) => answers[i] === q.c).length;
 
-    if (Object.keys(answers).length < current.questions.length) {
-      showToast('يرجى الإجابة عن جميع الأسئلة أولًا');
-      return;
-    }
-
-    let correct = 0;
-    current.questions.forEach((q, i) => {
-      if (answers[i] === q.c) correct++;
-    });
-
-    const total = current.questions.length;
-    const percent = Math.round((correct / total) * 100);
-    const passed = percent >= 60;
-
-    let pointsEarned = 0;
+    setResult({ correct, total: qs.length });
+    setSubmitted(true);
 
     if (userId) {
-      pointsEarned = correct * 5 + (passed ? 20 : 0);
-
-      await supabase.from('listening_progress').upsert(
-        {
-          user_id: userId,
-          exercise_id: current.id,
-          score: percent,
-          updated_at: new Date().toISOString(),
-        },
-        { onConflict: 'user_id,exercise_id' }
-      );
-
       const { data: profile } = await supabase
         .from('profiles')
         .select('*')
         .eq('id', userId)
         .single();
 
-      const today = new Date().toDateString();
-      const last = profile?.last_activity_date
-        ? new Date(profile.last_activity_date).toDateString()
-        : null;
-
-      let streak = profile?.streak ?? 0;
-      if (last !== today) {
-        const yesterday = new Date(Date.now() - 86400000).toDateString();
-        streak = last === yesterday ? streak + 1 : 1;
-      }
-
       await supabase
         .from('profiles')
-        .update({
-          points: (profile?.points ?? 0) + pointsEarned,
-          streak,
-          last_activity_date: new Date().toISOString(),
-        })
+        .update({ points: (profile?.points ?? 0) + correct * 2 })
         .eq('id', userId);
 
-      setDone((prev) => ({ ...prev, [current.id]: percent }));
+      setToast(`+${correct * 2} نقطة!`);
+      setTimeout(() => setToast(''), 2500);
     }
-
-    setSubmitted(true);
-    setResult({ correct, total, percent, passed, pointsEarned });
   }
 
   return (
     <main className="container">
-          <Upsell role={role} feature="الاستماع" />
+      <Upsell role={role} feature="الاستماع" />
+
       <div className="page-head">
         <h1 className="page-title">الاستماع الحقيقي 🎧</h1>
         <a className="btn btn-ghost" href="/dashboard">← لوحة التعلم</a>
       </div>
 
-      {current === null ? (
+      {!current && (
         <>
-          <div className="card" style={{ marginBottom: 18 }}>
-            <p className="muted" style={{ margin: 0, lineHeight: 2 }}>
-              تدريبات استماع بأسلوب امتحان Goethe: إعلانات، محادثات، نشرات، ونقاشات.
-              اضغط 🔊 واستمع ثم أجب. في الحوارات ستسمع نبرتين مختلفتين لشخصين!
-              أكمل التدريب بنسبة 60%+ لتحصل على النقاط وعلامة ✅.
-            </p>
-          </div>
-
-          <div className="pills" style={{ marginBottom: 20 }}>
+          <div className="pills" style={{ marginBottom: 16 }}>
             {['A1', 'A2', 'B1', 'B2'].map((l) => (
               <button
                 key={l}
@@ -204,87 +109,63 @@ export default function ListeningPage() {
           </div>
 
           <div style={{ display: 'grid', gap: 12 }}>
-            {filtered.slice(0, LIMITS[role].listening).map((ex) => (
-              <div
+            {visible.map((ex) => (
+              <button
                 key={ex.id}
                 className="card"
-                style={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                  flexWrap: 'wrap',
-                  gap: 10,
-                }}
+                style={{ textAlign: 'right', cursor: 'pointer' }}
+                onClick={() => open(ex)}
               >
-                <div>
-                  <div style={{ fontWeight: 800, fontSize: 16 }}>
-                    {kindIcon[ex.kind] || '🎧'} {ex.title_ar}
-                  </div>
-                  <div style={{ display: 'flex', gap: 6, marginTop: 6, flexWrap: 'wrap' }}>
-                    <span className="chip">{ex.kind}</span>
-                    {done[ex.id] !== undefined && (
-                      <span className="chip" style={{ background: '#dcfce7', color: '#16a34a' }}>
-                        ✅ مكتمل {done[ex.id]}%
-                      </span>
-                    )}
-                  </div>
-                </div>
-                <button className="btn btn-primary" onClick={() => open(ex)}>
-                  ابدأ التدريب
-                </button>
-              </div>
+                <div style={{ fontWeight: 800, marginBottom: 4 }}>{ex.title_ar}</div>
+                <div className="muted small">استمع بالم سرعتين ثم أجب عن الأسئلة</div>
+              </button>
             ))}
           </div>
         </>
-      ) : (
-        <>
-          <div className="page-head">
-            <h2 style={{ margin: 0, fontSize: 22, fontWeight: 900 }}>
-              {kindIcon[current.kind] || '🎧'} {current.title_ar}
-            </h2>
-            <button
-              className="btn btn-ghost"
-              onClick={() => {
-                stopAudio();
-                setCurrent(null);
-              }}
-            >
-              ← كل التدريبات
+      )}
+
+      {current && (
+        <div className="card">
+          <div
+            style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              flexWrap: 'wrap',
+              gap: 10,
+              marginBottom: 14,
+            }}
+          >
+            <b style={{ fontSize: 18 }}>{current.title_ar}</b>
+            <button className="btn btn-ghost" onClick={() => setCurrent(null)}>
+              ← كل المقاطع
             </button>
           </div>
 
-          <div className="card" style={{ textAlign: 'center', marginBottom: 18 }}>
-            <p className="muted small" style={{ marginBottom: 12 }}>
-              استمع للمقطع جيدًا، ويمكنك إعادة التشغيل أكثر من مرة.
-            </p>
-            <div style={{ display: 'flex', gap: 10, justifyContent: 'center' }}>
-              <button className="btn btn-primary btn-lg" onClick={() => play(current)}>
-                🔊 تشغيل المقطع
-              </button>
-              {playing && (
-                <button className="btn btn-ghost btn-lg" onClick={stopAudio}>
-                  ⏹ إيقاف
-                </button>
-              )}
-            </div>
+          <div style={{ display: 'flex', gap: 10, marginBottom: 16, flexWrap: 'wrap' }}>
+            <button className="btn btn-primary" onClick={() => play(current.text_de, 'normal')}>
+              {playing === 'normal' ? '⏸ يعمل...' : '🔊 سرعة طبيعية'}
+            </button>
+            <button className="btn btn-ghost" onClick={() => play(current.text_de, 'slow')}>
+              {playing === 'slow' ? '⏸ يعمل...' : '🐢 سرعة بطيئة'}
+            </button>
           </div>
 
           {(current.questions || []).map((q, qi) => (
-            <div key={qi} className="card" style={{ marginBottom: 14 }}>
-              <p style={{ fontWeight: 800, marginBottom: 10 }}>
-                {qi + 1}. {q.q}
+            <div key={qi} style={{ marginBottom: 16 }}>
+              <p dir="ltr" style={{ fontWeight: 800, textAlign: 'left', marginBottom: 8 }}>
+                {q.q}
               </p>
-
               <div style={{ display: 'grid', gap: 8 }}>
                 {q.o.map((opt, oi) => {
                   let cls = 'option';
-                  if (!submitted && answers[qi] === oi) cls += ' selected';
                   if (submitted && oi === q.c) cls += ' correct';
-                  else if (submitted && answers[qi] === oi) cls += ' wrong';
+                  else if (submitted && answers[qi] === oi && oi !== q.c) cls += ' wrong';
+                  else if (answers[qi] === oi) cls += ' selected';
 
                   return (
                     <button key={oi} className={cls} onClick={() => select(qi, oi)}>
-                      {opt}
+                      <span dir="ltr">{opt}</span>
                     </button>
                   );
                 })}
@@ -292,29 +173,24 @@ export default function ListeningPage() {
             </div>
           ))}
 
-          <button className="btn btn-primary btn-lg" onClick={submit} disabled={submitted}>
-            {submitted ? 'تم التصحيح' : 'تسليم الإجابات'}
-          </button>
-
-          {result && (
-            <div className={`result-box ${result.passed ? 'result-good' : 'result-warn'}`}>
-              {result.passed
-                ? `🎉 أتممت التدريب بنجاح! نتيجتك ${result.correct} من ${result.total} (${result.percent}%)`
-                : `نتيجتك ${result.correct} من ${result.total} (${result.percent}%) — أعد الاستماع وحاول مجددًا`}
-              {userId && result.passed && (
-                <>
-                  <br />+{result.pointsEarned} نقطة أُضيفت لحسابك ⭐
-                </>
-              )}
-              {!userId && (
-                <>
-                  <br />
-                  سجّل الدخول لحفظ تقدمك وكسب النقاط.
-                </>
-              )}
+          {!submitted ? (
+            <button className="btn btn-primary btn-lg" onClick={submit}>
+              تحقق من إجاباتك
+            </button>
+          ) : (
+            <div
+              className="card"
+              style={{
+                textAlign: 'center',
+                background: result.correct === result.total ? '#f0fdf4' : '#fffbeb',
+              }}
+            >
+              <b style={{ fontSize: 20 }}>
+                نتيجتك: {result.correct} من {result.total}
+              </b>
             </div>
           )}
-        </>
+        </div>
       )}
 
       {toast && <div className="toast">{toast}</div>}
