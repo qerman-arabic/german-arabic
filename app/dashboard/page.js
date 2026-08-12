@@ -92,6 +92,18 @@ export default function DashboardPage() {
     );
   }
 
+  // ===== حساب الأيام المتبقية في Premium =====
+  const isPremium = profile?.is_premium &&
+    (!profile?.premium_until ||
+      new Date(profile.premium_until).getTime() > Date.now());
+
+  let premiumLeft = null;
+  if (isPremium && profile?.premium_until) {
+    premiumLeft = Math.ceil(
+      (new Date(profile.premium_until).getTime() - Date.now()) / 86400000
+    );
+  }
+
   // ===== حسابات الخطة =====
   const daysLeft = profile?.plan_exam_date
     ? Math.ceil((new Date(profile.plan_exam_date) - new Date()) / 86400000)
@@ -144,6 +156,26 @@ export default function DashboardPage() {
             <b>{profile?.streak ?? 0}</b>
             <span>أيام 🔥</span>
           </div>
+          {isPremium && (
+            <div
+              className="bstat"
+              style={{
+                background:
+                  premiumLeft !== null && premiumLeft <= 3
+                    ? 'rgba(234, 179, 8, .45)'
+                    : 'rgba(16, 185, 129, .35)',
+              }}
+            >
+              <b>{premiumLeft !== null ? premiumLeft : '♾️'}</b>
+              <span>
+                {premiumLeft !== null
+                  ? premiumLeft <= 3
+                    ? 'يومًا متبقيًا ⏰'
+                    : 'يومًا متبقيًا 💎'
+                  : 'اشتراك دائم 💎'}
+              </span>
+            </div>
+          )}
           {daysLeft !== null && daysLeft >= 0 && (
             <div className="bstat" style={{ background: 'rgba(255,255,255,.25)' }}>
               <b>{daysLeft}</b>
