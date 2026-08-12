@@ -140,16 +140,16 @@ export default function CertificatePage() {
             <div
               className={printId === c.level.id ? 'cert-active' : ''}
               style={{
-                background: 'linear-gradient(135deg,#0f766e,#10b981)',
+                background: 'linear-gradient(135deg,#FFCE00,#f59e0b)',
                 borderRadius: 26,
-                padding: 8,
+                padding: 6,
                 marginBottom: 14,
               }}
             >
               <div
                 style={{
-                  background: '#fff',
-                  borderRadius: 20,
+                  background: 'linear-gradient(160deg,#0b3d39,#0f766e)',
+                  borderRadius: 22,
                   padding: '34px 26px',
                   textAlign: 'center',
                 }}
@@ -168,39 +168,54 @@ export default function CertificatePage() {
                     alt="شعار المنصة"
                     width={64}
                     height={64}
-                    style={{ borderRadius: 14 }}
+                    style={{ borderRadius: 14, border: '3px solid #FFCE00' }}
                   />
-                  <b style={{ fontSize: 22, color: '#0f766e' }}>German بالعربي</b>
+                  <b style={{ fontSize: 22, color: '#FFCE00' }}>German بالعربي</b>
                 </div>
 
-                <div className="muted small">شهادة إتمام • Zertifikat</div>
+                <div style={{ color: 'rgba(255,255,255,.75)', fontSize: 13 }}>
+                  شهادة إتمام • Zertifikat
+                </div>
 
                 <div
                   style={{
                     fontFamily: 'Georgia, serif',
                     fontStyle: 'italic',
                     fontSize: 21,
-                    color: '#0f766e',
+                    color: '#FFCE00',
                     margin: '12px 0 4px',
                   }}
                 >
                   {GERMAN_WISHES[c.level.code] || GERMAN_WISHES.A1}
                 </div>
 
-                <h2 style={{ fontSize: 30, fontWeight: 900, color: '#0f172a', margin: '10px 0' }}>
+                <h2 style={{ fontSize: 30, fontWeight: 900, color: '#ffffff', margin: '10px 0' }}>
                   {profile?.full_name || 'متعلم متميز'}
                 </h2>
 
-                <p style={{ marginBottom: 8 }}>أتمّ بنجاح جميع دروس مستوى</p>
+                <p style={{ marginBottom: 8, color: '#e6fffa' }}>
+                  أتمّ بنجاح جميع دروس مستوى
+                </p>
 
                 <div
-                  className="level-badge"
-                  style={{ margin: '0 auto 12px', width: 64, height: 64, fontSize: 22 }}
+                  style={{
+                    margin: '0 auto 12px',
+                    width: 64,
+                    height: 64,
+                    borderRadius: '50%',
+                    background: '#FFCE00',
+                    color: '#0b3d39',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontWeight: 900,
+                    fontSize: 22,
+                  }}
                 >
                   {c.level.code}
                 </div>
 
-                <p className="muted small">
+                <p style={{ color: 'rgba(255,255,255,.75)', fontSize: 13 }}>
                   {c.done} درسًا — {new Date().toLocaleDateString('ar-EG')}
                 </p>
 
@@ -220,15 +235,17 @@ export default function CertificatePage() {
                         fontFamily: 'Georgia, serif',
                         fontStyle: 'italic',
                         fontWeight: 700,
-                        color: '#0f766e',
+                        color: '#FFCE00',
                       }}
                     >
                       إدارة German بالعربي
                     </div>
-                    <div className="muted small">التوقيع الرسمي</div>
+                    <div style={{ color: 'rgba(255,255,255,.6)', fontSize: 12 }}>
+                      التوقيع الرسمي
+                    </div>
                   </div>
 
-                  <div className="muted small" style={{ direction: 'ltr' }}>
+                  <div style={{ color: 'rgba(255,255,255,.75)', fontSize: 12, direction: 'ltr' }}>
                     رقم الشهادة: {certNo}
                   </div>
 
@@ -236,7 +253,7 @@ export default function CertificatePage() {
                     src="https://api.qrserver.com/v1/create-qr-code/?size=80x80&data=https://german-arabic.vercel.app/"
                     width={80}
                     height={80}
-                    style={{ borderRadius: 8 }}
+                    style={{ borderRadius: 8, background: '#fff', padding: 6 }}
                     alt="QR"
                   />
                 </div>
