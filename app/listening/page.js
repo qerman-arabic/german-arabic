@@ -29,7 +29,7 @@ export default function ListeningPage() {
   }, []);
 
   const filtered = exercises.filter((e) => e.level_code === level);
-  const visible = filtered.slice(0, LIMITS[role].listening);
+  const visible = filtered.slice(0, role === 'guest' && level !== 'A1' ? 0 : LIMITS[role].listening);
 
   function play(text, speed) {
     if (!('speechSynthesis' in window)) return;

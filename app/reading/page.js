@@ -28,7 +28,7 @@ export default function ReadingPage() {
   }, []);
 
   const filtered = texts.filter((t) => t.level_code === level);
-  const visible = filtered.slice(0, LIMITS[role].reading);
+  const visible = filtered.slice(0, role === 'guest' && level !== 'A1' ? 0 : LIMITS[role].reading);
 
   function play(text) {
     if (!('speechSynthesis' in window)) return;

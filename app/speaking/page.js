@@ -229,7 +229,7 @@ export default function SpeakingPage() {
           </div>
 
           <div style={{ display: 'grid', gap: 12 }}>
-            {filtered.slice(0, LIMITS[role].speaking).map((s) => (
+            {filtered.slice(0, role === 'guest' && level !== 'A1' ? 0 : LIMITS[role].speaking).map((s) => (
               <div
                 key={s.id}
                 className="card"

@@ -27,7 +27,7 @@ export default function GrammarPage() {
   }, []);
 
   const filtered = topics.filter((t) => t.levels?.code === activeLevel);
-  const visible = filtered.slice(0, LIMITS[role].grammar);
+  const visible = filtered.slice(0, role === 'guest' && activeLevel !== 'A1' ? 0 : LIMITS[role].grammar);
 
   if (loading) {
     return (

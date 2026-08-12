@@ -14,7 +14,6 @@ function mulberry32(seed) {
     seed = (seed + 0x6d2b79f5) | 0;
     let t = Math.imul(seed ^ (seed >>> 15), 1 | seed);
     t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
-  const { role } = useRole();
     return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
   };
 }
@@ -103,6 +102,7 @@ const sectionTitle = {
 };
 
 export default function GoethePage() {
+  const { role } = useRole();
   const [loading, setLoading] = useState(true);
   const [words, setWords] = useState([]);
   const [exercises, setExercises] = useState([]);
@@ -150,6 +150,15 @@ export default function GoethePage() {
 
     load();
   }, []);
+
+  const visibleCount =
+    role === 'guest'
+      ? level === 'A1'
+        ? 3
+        : 0
+      : role === 'free'
+      ? 5
+      : MODELS_PER_LEVEL;
 
   function showToast(message) {
     setToast(message);
@@ -219,6 +228,8 @@ export default function GoethePage() {
 
   return (
     <main className="container">
+      <Upsell role={role} feature="نماذج Goethe" />
+
       <div className="page-head">
         <h1 className="page-title">نماذج امتحان Goethe 🎓</h1>
         <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
@@ -260,7 +271,7 @@ export default function GoethePage() {
               gap: 10,
             }}
           >
-            {Array.from({ length: MODELS_PER_LEVEL }, (_, i) => i + 1).map((n) => (
+            {Array.from({ length: visibleCount }, (_, i) => i + 1).map((n) => (
               <button key={n} className="pill" style={{ padding: '16px 10px' }} onClick={() => openModel(n)}>
                 نموذج {n}
               </button>
