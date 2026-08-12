@@ -1,3 +1,5 @@
+'use client';
+
 function SocialIcon({ href, label, bg, d, external = true }) {
   return (
     <a
