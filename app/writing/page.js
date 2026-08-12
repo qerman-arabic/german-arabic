@@ -107,7 +107,7 @@ export default function WritingPage() {
           </div>
 
           <div style={{ display: 'grid', gap: 12 }}>
-            {          {filtered.slice(0, LIMITS[role].writing).map((t) => (
+          {filtered.slice(0, LIMITS[role].writing).map((t) => (
               <div
                 key={t.id}
                 className="card"
