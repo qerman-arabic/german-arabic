@@ -1,5 +1,8 @@
 'use client';
 
+import { useRole, LIMITS } from '../../lib/access';
+import Upsell from '../../components/Upsell';
+
 import { useEffect, useState } from 'react';
 import { supabase } from '../lib/supabase';
 
@@ -94,6 +97,7 @@ export default function HomePage() {
     else setManualHint(true);
   }
 
+  const { role } = useRole();
   return (
     <main>
       <header

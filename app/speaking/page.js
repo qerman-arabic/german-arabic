@@ -193,6 +193,7 @@ export default function SpeakingPage() {
     setLoading(false);
   }
 
+  const { role } = useRole();
   return (
     <main className="container">
                <Upsell role={role} feature="الشفوي" />

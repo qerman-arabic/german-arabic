@@ -1,4 +1,4 @@
-'use client';
+['use client';
 
 import { useRole, LIMITS } from '../../lib/access';
 import Upsell from '../../components/Upsell';
@@ -75,6 +75,7 @@ export default function WritingPage() {
     setLoading(false);
   }
 
+  const { role } = useRole();
   return (
     <main className="container">
           <Upsell role={role} feature="الكتابة" />
