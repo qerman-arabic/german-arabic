@@ -1,5 +1,4 @@
 ['use client';
-
 import { useRole, LIMITS } from '../../lib/access';
 import Upsell from '../../components/Upsell';
 
