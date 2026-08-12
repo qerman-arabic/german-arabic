@@ -2,11 +2,15 @@
 
 import { useEffect, useState } from 'react';
 import { supabase } from '../../lib/supabase';
+import { useRole, LIMITS } from '../../lib/access';
+import Upsell from '../../components/Upsell';
 
 export default function GrammarPage() {
+  const { role, userId } = useRole();
   const [topics, setTopics] = useState([]);
   const [activeLevel, setActiveLevel] = useState('A1');
   const [loading, setLoading] = useState(true);
+  const [active, setActive] = useState(null);
 
   useEffect(() => {
     async function load() {
@@ -23,6 +27,7 @@ export default function GrammarPage() {
   }, []);
 
   const filtered = topics.filter((t) => t.levels?.code === activeLevel);
+  const visible = filtered.slice(0, LIMITS[role].grammar);
 
   if (loading) {
     return (
@@ -34,76 +39,97 @@ export default function GrammarPage() {
 
   return (
     <main className="container">
+      <Upsell role={role} feature="القواعد" />
+
       <div className="page-head">
         <h1 className="page-title">القواعد الألمانية 📘</h1>
-        <a className="btn btn-ghost" href="/dashboard">← لوحة التعلم</a>
+        <a className="btn btn-ghost" href="/explore">← تصفح الأقسام</a>
       </div>
 
-      <div className="pills" style={{ marginBottom: 20 }}>
-        {['A1', 'A2', 'B1', 'B2'].map((l) => (
-          <button
-            key={l}
-            className="pill"
-            onClick={() => setActiveLevel(l)}
-            style={
-              activeLevel === l
-                ? { background: 'var(--primary)', color: '#fff', borderColor: 'var(--primary)' }
-                : {}
-            }
-          >
-            {l}
-          </button>
-        ))}
-      </div>
+      {!active && (
+        <>
+          <div className="pills" style={{ marginBottom: 20 }}>
+            {['A1', 'A2', 'B1', 'B2'].map((l) => (
+              <button
+                key={l}
+                className="pill"
+                onClick={() => setActiveLevel(l)}
+                style={
+                  activeLevel === l
+                    ? { background: 'var(--primary)', color: '#fff', borderColor: 'var(--primary)' }
+                    : {}
+                }
+              >
+                {l}
+              </button>
+            ))}
+          </div>
 
-      {filtered.length === 0 && (
-        <div className="card">
-          <p className="muted">لا توجد قواعد لهذا المستوى بعد.</p>
-        </div>
+          <div style={{ display: 'grid', gap: 12 }}>
+            {visible.map((t) => (
+              <button
+                key={t.id}
+                className="card"
+                style={{ textAlign: 'right', cursor: 'pointer' }}
+                onClick={() => setActive(t)}
+              >
+                <div style={{ fontWeight: 800, marginBottom: 4 }}>{t.title_ar}</div>
+                <div className="muted small">اضغط لشرح القاعدة مع الأمثلة</div>
+              </button>
+            ))}
+          </div>
+        </>
       )}
 
-           {filtered.slice(0, LIMITS[role].grammar).map((topic) => {
-        const deList = (topic.examples_de || '').split(' / ');
-        const arList = (topic.examples_ar || '').split(' / ');
+      {active && (
+        <div className="card">
+          <div
+            style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              flexWrap: 'wrap',
+              gap: 10,
+              marginBottom: 14,
+            }}
+          >
+            <b style={{ fontSize: 18 }}>{active.title_ar}</b>
+            <button className="btn btn-ghost" onClick={() => setActive(null)}>
+              ← كل القواعد
+            </button>
+          </div>
 
-        return (
-          <div key={topic.id} className="card" style={{ marginBottom: 16 }}>
-            <div
-              style={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                flexWrap: 'wrap',
-                gap: 8,
-                marginBottom: 10,
-              }}
-            >
-              <h2 style={{ margin: 0, fontSize: 20, fontWeight: 900 }}>{topic.title_ar}</h2>
-              <span className="chip">{topic.title_de}</span>
+          <div style={{ lineHeight: 2, marginBottom: 16 }}>
+            <div style={{ fontWeight: 800, marginBottom: 8 }}>الشرح:</div>
+            <div style={{ whiteSpace: 'pre-wrap' }}>{active.explanation_ar}</div>
+          </div>
+
+          <div style={{ lineHeight: 2, marginBottom: 16 }}>
+            <div style={{ fontWeight: 800, marginBottom: 8 }}>القاعدة الألمانية:</div>
+            <div dir="ltr" style={{ whiteSpace: 'pre-wrap', textAlign: 'left' }}>
+              {active.rule_de}
             </div>
+          </div>
 
-            <p className="muted" style={{ lineHeight: 2, marginBottom: 14 }}>
-              {topic.explanation_ar}
-            </p>
-
-            <div
-              style={{
-                background: '#f8fafc',
-                border: '1px solid var(--line)',
-                borderRadius: 14,
-                padding: 14,
-              }}
-            >
-              {deList.map((de, i) => (
-                <div key={i} style={{ marginBottom: i < deList.length - 1 ? 10 : 0 }}>
-                  <div style={{ fontWeight: 700 }}>{de}</div>
-                  <div className="muted small">{arList[i] || ''}</div>
+          {(active.examples || []).length > 0 && (
+            <div style={{ lineHeight: 2 }}>
+              <div style={{ fontWeight: 800, marginBottom: 8 }}>أمثلة:</div>
+              {active.examples.map((ex, i) => (
+                <div
+                  key={i}
+                  className="card"
+                  style={{ background: '#f8fafc', marginBottom: 8, padding: 12 }}
+                >
+                  <div dir="ltr" style={{ fontWeight: 700, textAlign: 'left', marginBottom: 4 }}>
+                    {ex.de}
+                  </div>
+                  <div className="muted">{ex.ar}</div>
                 </div>
               ))}
             </div>
-          </div>
-        );
-      })}
+          )}
+        </div>
+      )}
     </main>
   );
 }
