@@ -3,6 +3,8 @@ import './globals.css';
 
 import AdminLink from '../components/AdminLink';
 
+import Footer from '../components/Footer';
+
 export const metadata = {
   title: 'German بالعربي — تعلّم الألمانية',
   description: 'منصة عربية متكاملة للتحضير لامتحان Goethe من A1 حتى B2',
@@ -32,6 +34,7 @@ export default function RootLayout({ children }) {
       </head>
       <body>
         {children}
+        <Footer />
         <AdminLink />
 
         {/* تسجيل عامل الخدمة للتطبيق */}
