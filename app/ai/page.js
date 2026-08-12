@@ -1,6 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { useRole, LIMITS } from '../../lib/access';
+import Upsell from '../../components/Upsell';
 
 const suggestions = [
   'تحدث معي بالألمانية بمستوى A1',
@@ -10,18 +12,36 @@ const suggestions = [
 ];
 
 export default function AIPage() {
+  const { role, loading: roleLoading } = useRole();
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
+  const [used, setUsed] = useState(0);
+
+  const today = new Date().toDateString();
+
+  useEffect(() => {
+    setUsed(Number(localStorage.getItem('ai_' + today) || 0));
+  }, [today]);
+
+  const limit = LIMITS[role].ai;
+  const locked = !roleLoading && used >= limit;
+
+  function bump() {
+    const next = used + 1;
+    setUsed(next);
+    localStorage.setItem('ai_' + today, String(next));
+  }
 
   async function send(text) {
     const message = (text || input).trim();
-    if (!message || loading) return;
+    if (!message || loading || locked) return;
 
     setInput('');
     const newMessages = [...messages, { role: 'user', text: message }];
     setMessages(newMessages);
     setLoading(true);
+    bump();
 
     try {
       const res = await fetch('/api/ai', {
@@ -43,9 +63,18 @@ export default function AIPage() {
 
   return (
     <main className="container">
+      <Upsell role={role} feature="المعلم الذكي" />
+
       <div className="page-head">
         <h1 className="page-title">المعلم الذكي 🤖</h1>
-        <a className="btn btn-ghost" href="/dashboard">← لوحة التعلم</a>
+        <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+          {role !== 'premium' && (
+            <span className="chip">
+              المتبقي اليوم: {Math.max(limit - used, 0)} من {limit}
+            </span>
+          )}
+          <a className="btn btn-ghost" href="/dashboard">← لوحة التعلم</a>
+        </div>
       </div>
 
       <div
@@ -70,7 +99,7 @@ export default function AIPage() {
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: 8, alignItems: 'center' }}>
               {suggestions.map((s) => (
-                <button key={s} className="pill" onClick={() => send(s)}>
+                <button key={s} className="pill" onClick={() => send(s)} disabled={locked}>
                   {s}
                 </button>
               ))}
@@ -109,18 +138,27 @@ export default function AIPage() {
         {loading && <p className="muted small">المعلم يكتب الرد...</p>}
       </div>
 
-      <div style={{ display: 'flex', gap: 10 }}>
-        <input
-          className="input"
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          onKeyDown={(e) => e.key === 'Enter' && send()}
-          placeholder="اكتب بالألمانية أو العربية..."
-        />
-        <button className="btn btn-primary btn-lg" onClick={() => send()} disabled={loading}>
-          إرسال
-        </button>
-      </div>
+      {locked ? (
+        <div className="card" style={{ textAlign: 'center' }}>
+          <b>⏳ انتهت رسائل اليوم المجانية</b>
+          <p className="muted" style={{ margin: '6px 0 0' }}>
+            عد غدًا، أو افتح المحادثات غير المحدودة مع Premium.
+          </p>
+        </div>
+      ) : (
+        <div style={{ display: 'flex', gap: 10 }}>
+          <input
+            className="input"
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            onKeyDown={(e) => e.key === 'Enter' && send()}
+            placeholder="اكتب بالألمانية أو العربية..."
+          />
+          <button className="btn btn-primary btn-lg" onClick={() => send()} disabled={loading}>
+            إرسال
+          </button>
+        </div>
+      )}
     </main>
   );
 }
