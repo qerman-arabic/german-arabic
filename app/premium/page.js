@@ -72,16 +72,15 @@ export default function PremiumPage() {
           <li>حوّل المبلغ عبر أحد الطرق بالأسفل.</li>
           <li>أرسل صورة الإيصال مع بريدك الإلكتروني المسجل في المنصة.</li>
           <li>يُفعَّل اشتراكك خلال أقل من 24 ساعة.</li>
-        </ol>
-        <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginTop: 14 }}>
-          <a className="btn btn-primary" href="https://buy.stripe.com/رابطك-هنا" target="_blank" rel="noreferrer">
-            💳 بطاقة (Stripe)
+        </ol>        <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginTop: 14 }}>
+          <a className="btn btn-primary btn-lg" href="https://paypal.me/germanarabic/10" target="_blank" rel="noreferrer">
+            💙 ادفع 10$ — شهر امتحان
           </a>
-          <a className="btn btn-ghost" href="https://paypal.me/معرفك-هنا" target="_blank" rel="noreferrer">
-            ️ PayPal
+          <a className="btn btn-primary btn-lg" href="https://paypal.me/germanarabic/20" target="_blank" rel="noreferrer">
+            💙 ادفع 20$ — 3 أشهر
           </a>
-          <a className="btn btn-ghost" href="https://wa.me/رقمك-هنا" target="_blank" rel="noreferrer">
-            📱 واتساب (حوالة محلية)
+          <a className="btn btn-primary btn-lg" href="https://paypal.me/germanarabic/29" target="_blank" rel="noreferrer">
+            💙 ادفع 29$ — وصول دائم
           </a>
         </div>
         <p className="muted small" style={{ marginTop: 10 }}>
