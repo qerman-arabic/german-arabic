@@ -92,9 +92,12 @@ export default function PremiumPage() {
         <b>🛒 طريقة الاشتراك:</b>
         <ol style={{ margin: '8px 0 0', paddingLeft: 18 }}>
           <li>اضغط زر الباقة المناسبة — سيتم تحويلك إلى PayPal.</li>
-          <li>أرسل صورة الإيصال مع بريدك الإلكتروني المسجل في المنصة.</li>
-          <li>يُفعَّل اشتراكك خلال أقل من 24 ساعة.</li>
-        </ol>
+          <li>
+            في صفحة الدفع اكتب <b>بريدك الإلكتروني المسجل في المنصة</b> داخل خانة
+            «Add a note / إضافة ملاحظة».
+          </li>
+          <li>أتمم الدفع — يصلنا بريدك مع المعاملة ونفعّل اشتراكك خلال 24 ساعة. ✅</li>
+        </ol> 
 
         <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginTop: 14 }}>
           <a className="btn btn-primary btn-lg" href="https://paypal.me/germanarabic/20" target="_blank" rel="noreferrer">
