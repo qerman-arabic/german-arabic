@@ -86,7 +86,7 @@ export default function DashboardPage() {
 
   if (loading) {
     return (
-      <main className="container" style={{ textAlign: 'center', padding: 60 }}>
+      <main className="container" style={{ textAlign: 'center', padding: 80 }}>
         <p className="muted" style={{ fontWeight: 800 }}>جارٍ التحميل...</p>
       </main>
     );
