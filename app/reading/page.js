@@ -2,77 +2,44 @@
 
 import { useEffect, useState } from 'react';
 import { supabase } from '../../lib/supabase';
+import { useRole, LIMITS } from '../../lib/access';
+import Upsell from '../../components/Upsell';
 
 export default function ReadingPage() {
-  const [userId, setUserId] = useState(null);
+  const { role, userId } = useRole();
   const [texts, setTexts] = useState([]);
   const [level, setLevel] = useState('A1');
   const [current, setCurrent] = useState(null);
   const [answers, setAnswers] = useState({});
   const [submitted, setSubmitted] = useState(false);
   const [result, setResult] = useState(null);
-  const [playing, setPlaying] = useState(false);
   const [toast, setToast] = useState('');
 
   useEffect(() => {
     async function load() {
-      const { data } = await supabase.auth.getSession();
-      if (data?.session) setUserId(data.session.user.id);
-
-      const { data: t } = await supabase
+      const { data } = await supabase
         .from('reading_texts')
         .select('*')
         .order('sort_order');
 
-      setTexts(t || []);
-
-      if ('speechSynthesis' in window) {
-        window.speechSynthesis.getVoices();
-        window.speechSynthesis.onvoiceschanged = () => window.speechSynthesis.getVoices();
-      }
+      setTexts(data || []);
     }
     load();
   }, []);
 
   const filtered = texts.filter((t) => t.level_code === level);
-
-  function showToast(message) {
-    setToast(message);
-    setTimeout(() => setToast(''), 2500);
-  }
-
-  function stopAudio() {
-    if ('speechSynthesis' in window) window.speechSynthesis.cancel();
-    setPlaying(false);
-  }
+  const visible = filtered.slice(0, LIMITS[role].reading);
 
   function play(text) {
-    if (!('speechSynthesis' in window)) {
-      showToast('المتصفح لا يدعم النطق');
-      return;
-    }
-
-    stopAudio();
-
-    const sentences = text.match(/[^.!?]+[.!?]*/g) || [text];
-    sentences.forEach((s) => {
-      const u = new SpeechSynthesisUtterance(s.trim());
-      u.lang = 'de-DE';
-      u.rate = 0.92;
-      const voices = window.speechSynthesis.getVoices();
-      const de = voices.find((v) => v.lang && v.lang.toLowerCase().startsWith('de'));
-      if (de) u.voice = de;
-      window.speechSynthesis.speak(u);
-    });
-
-    const end = new SpeechSynthesisUtterance(' ');
-    end.onend = () => setPlaying(false);
-    window.speechSynthesis.speak(end);
-    setPlaying(true);
+    if (!('speechSynthesis' in window)) return;
+    window.speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang = 'de-DE';
+    u.rate = 0.95;
+    window.speechSynthesis.speak(u);
   }
 
   function open(t) {
-    stopAudio();
     setCurrent(t);
     setAnswers({});
     setSubmitted(false);
@@ -85,81 +52,41 @@ export default function ReadingPage() {
   }
 
   async function submit() {
-    if (submitted) return;
+    const qs = current.questions || [];
+    const correct = qs.filter((q, i) => answers[i] === q.c).length;
 
-    if (Object.keys(answers).length < current.questions.length) {
-      showToast('أجب عن جميع الأسئلة أولًا');
-      return;
-    }
+    setResult({ correct, total: qs.length });
+    setSubmitted(true);
 
-    let correct = 0;
-    current.questions.forEach((q, i) => {
-      if (answers[i] === q.c) correct++;
-    });
-
-    const total = current.questions.length;
-    const percent = Math.round((correct / total) * 100);
-    const passed = percent >= 60;
-    let pointsEarned = 0;
-
-    if (userId && passed) {
-      pointsEarned = correct * 5 + 20;
-
+    if (userId) {
       const { data: profile } = await supabase
         .from('profiles')
         .select('*')
         .eq('id', userId)
         .single();
 
-      const today = new Date().toDateString();
-      const last = profile?.last_activity_date
-        ? new Date(profile.last_activity_date).toDateString()
-        : null;
-
-      let streak = profile?.streak ?? 0;
-      if (last !== today) {
-        const yesterday = new Date(Date.now() - 86400000).toDateString();
-        streak = last === yesterday ? streak + 1 : 1;
-      }
-
       await supabase
         .from('profiles')
-        .update({
-          points: (profile?.points ?? 0) + pointsEarned,
-          streak,
-          last_activity_date: new Date().toISOString(),
-        })
+        .update({ points: (profile?.points ?? 0) + correct * 2 })
         .eq('id', userId);
-    }
 
-    setSubmitted(true);
-    setResult({ correct, total, percent, passed, pointsEarned });
+      setToast(`+${correct * 2} نقطة!`);
+      setTimeout(() => setToast(''), 2500);
+    }
   }
 
   return (
     <main className="container">
-          <Upsell role={role} feature="القراءة" />
+      <Upsell role={role} feature="القراءة" />
+
       <div className="page-head">
         <h1 className="page-title">القراءة والاستماع 📖</h1>
         <a className="btn btn-ghost" href="/dashboard">← لوحة التعلم</a>
       </div>
 
-      {current === null ? (
+      {!current && (
         <>
-          <div className="card" style={{ marginBottom: 18 }}>
-            <p className="muted" style={{ margin: 0, lineHeight: 2 }}>
-              60 نصًا طويلًا (20 سطرًا) بمفردات مستوى كل نص. اقرأ واستمع 🔊 ثم أجب عن 5 أسئلة فهم.
-              أسئلة A1/A2 بالعربية وB1/B2 بالألمانية لمحاكاة الامتحان.
-            </p>
-          </div>
-
-          {texts.length === 0 && (
-            <div className="card result-warn" style={{ marginBottom: 18 }}>
-              لا توجد نصوص بعد — نفّذ دفعات النصوص في SQL Editor.
-            </div>
-          )}
-
-          <div className="pills" style={{ marginBottom: 20 }}>
+          <div className="pills" style={{ marginBottom: 16 }}>
             {['A1', 'A2', 'B1', 'B2'].map((l) => (
               <button
                 key={l}
@@ -177,73 +104,68 @@ export default function ReadingPage() {
           </div>
 
           <div style={{ display: 'grid', gap: 12 }}>
-            {filtered.slice(0, LIMITS[role].reading).map((t) => (
-              <div
+            {visible.map((t) => (
+              <button
                 key={t.id}
                 className="card"
-                style={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                  flexWrap: 'wrap',
-                  gap: 10,
-                }}
+                style={{ textAlign: 'right', cursor: 'pointer' }}
+                onClick={() => open(t)}
               >
-                <div>
-                  <div style={{ fontWeight: 800 }}>📖 {t.title_ar}</div>
-                  <span className="chip" style={{ marginTop: 6 }}>
-                    {t.text_de.trim().split(/\s+/).length} كلمة
-                  </span>
-                </div>
-                <button className="btn btn-primary" onClick={() => open(t)}>
-                  اقرأ واستمع
-                </button>
-              </div>
+                <div style={{ fontWeight: 800, marginBottom: 4 }}>{t.title_ar}</div>
+                <div className="muted small">اقرأ النص واستمع إليه ثم أجب</div>
+              </button>
             ))}
           </div>
         </>
-      ) : (
-        <>
-          <div className="page-head">
-            <h2 style={{ margin: 0, fontSize: 22, fontWeight: 900 }}>📖 {current.title_ar}</h2>
-            <button className="btn btn-ghost" onClick={() => { stopAudio(); setCurrent(null); }}>
-              ← كل النصوص
-            </button>
+      )}
+
+      {current && (
+        <div className="card">
+          <div
+            style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              flexWrap: 'wrap',
+              gap: 10,
+              marginBottom: 14,
+            }}
+          >
+            <b style={{ fontSize: 18 }}>{current.title_ar}</b>
+            <div style={{ display: 'flex', gap: 8 }}>
+              <button className="btn btn-ghost" onClick={() => play(current.text_de)}>
+                🔊 استمع للنص
+              </button>
+              <button className="btn btn-ghost" onClick={() => setCurrent(null)}>
+                ← كل النصوص
+              </button>
+            </div>
           </div>
 
-          <div className="card" style={{ marginBottom: 14 }}>
-            <div style={{ display: 'flex', gap: 10, marginBottom: 12, flexWrap: 'wrap' }}>
-              <button className="btn btn-primary" onClick={() => play(current.text_de)}>
-                🔊 استمع للنص كاملًا
-              </button>
-              {playing && (
-                <button className="btn btn-ghost" onClick={stopAudio}>⏹ إيقاف</button>
-              )}
-            </div>
-
-            <div
-              dir="ltr"
-              style={{
-                textAlign: 'left',
-                lineHeight: 2.1,
-                fontSize: 16,
-                whiteSpace: 'pre-line',
-                fontFamily: 'inherit',
-              }}
-            >
-              {current.text_de}
-            </div>
+          <div
+            dir="ltr"
+            className="card"
+            style={{
+              textAlign: 'left',
+              lineHeight: 2,
+              whiteSpace: 'pre-line',
+              background: '#f8fafc',
+              marginBottom: 16,
+            }}
+          >
+            {current.text_de}
           </div>
 
           {(current.questions || []).map((q, qi) => (
-            <div key={qi} className="card" style={{ marginBottom: 14 }}>
-              <p style={{ fontWeight: 800, marginBottom: 10 }}>{qi + 1}. {q.q}</p>
+            <div key={qi} style={{ marginBottom: 16 }}>
+              <p style={{ fontWeight: 800, marginBottom: 8 }}>{q.q}</p>
               <div style={{ display: 'grid', gap: 8 }}>
                 {q.o.map((opt, oi) => {
                   let cls = 'option';
-                  if (!submitted && answers[qi] === oi) cls += ' selected';
                   if (submitted && oi === q.c) cls += ' correct';
-                  else if (submitted && answers[qi] === oi) cls += ' wrong';
+                  else if (submitted && answers[qi] === oi && oi !== q.c) cls += ' wrong';
+                  else if (answers[qi] === oi) cls += ' selected';
+
                   return (
                     <button key={oi} className={cls} onClick={() => select(qi, oi)}>
                       {opt}
@@ -254,21 +176,24 @@ export default function ReadingPage() {
             </div>
           ))}
 
-          <button className="btn btn-primary btn-lg" onClick={submit} disabled={submitted}>
-            {submitted ? 'تم التصحيح' : 'تسليم الإجابات'}
-          </button>
-
-          {result && (
-            <div className={`result-box ${result.passed ? 'result-good' : 'result-warn'}`}>
-              فهمك القرائي: {result.correct} من {result.total} ({result.percent}%)
-              {userId && result.passed && (
-                <>
-                  <br />+{result.pointsEarned} نقطة ⭐
-                </>
-              )}
+          {!submitted ? (
+            <button className="btn btn-primary btn-lg" onClick={submit}>
+              تحقق من إجاباتك
+            </button>
+          ) : (
+            <div
+              className="card"
+              style={{
+                textAlign: 'center',
+                background: result.correct === result.total ? '#f0fdf4' : '#fffbeb',
+              }}
+            >
+              <b style={{ fontSize: 20 }}>
+                نتيجتك: {result.correct} من {result.total}
+              </b>
             </div>
           )}
-        </>
+        </div>
       )}
 
       {toast && <div className="toast">{toast}</div>}
