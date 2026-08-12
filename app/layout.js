@@ -1,6 +1,8 @@
 import Script from 'next/script';
 import './globals.css';
 
+import { Analytics } from '@vercel/analytics/react';
+
 import AdminLink from '../components/AdminLink';
 
 import Footer from '../components/Footer';
@@ -35,6 +37,7 @@ export default function RootLayout({ children }) {
       <body>
         {children}
         <Footer />
+        <Analytics />
         <AdminLink />
 
         {/* تسجيل عامل الخدمة للتطبيق */}
