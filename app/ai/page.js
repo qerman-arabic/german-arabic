@@ -24,6 +24,15 @@ export default function AIPage() {
     setUsed(Number(localStorage.getItem('ai_' + today) || 0));
   }, [today]);
 
+  useEffect(() => {
+    const saved = localStorage.getItem('ai_history');
+    if (saved) setMessages(JSON.parse(saved));
+  }, []);
+
+  useEffect(() => {
+    localStorage.setItem('ai_history', JSON.stringify(messages));
+  }, [messages]);
+
   const limit = LIMITS[role].ai;
   const locked = !roleLoading && used >= limit;
 
@@ -66,7 +75,14 @@ export default function AIPage() {
       <Upsell role={role} feature="المعلم الذكي" />
 
       <div className="page-head">
-        <h1 className="page-title">المعلم الذكي 🤖</h1>
+        <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+          <h1 className="page-title" style={{ margin: 0 }}>المعلم الذكي 🤖</h1>
+          {messages.length > 0 && (
+            <button className="pill" onClick={() => { setMessages([]); localStorage.removeItem('ai_history'); }}>
+              🗑️ محادثة جديدة
+            </button>
+          )}
+        </div>
         <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
           {role !== 'premium' && (
             <span className="chip">
