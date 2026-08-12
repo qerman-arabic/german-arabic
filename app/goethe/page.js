@@ -241,14 +241,13 @@ export default function GoethePage() {
       {model === null ? (
         <>
           <div className="card" style={{ marginBottom: 18 }}>
-            <p className="muted" style={{ margin: 0, lineHeight: 2 }}>
-              60 نموذجًا تدريبيًا بأسلوب امتحان Goethe (20 لكل مستوى): استماع، قراءة، مفردات، وقواعد.
+            <p className="muted" style={{ margin: 0, lineHeight: 2 }}>              80 نموذجًا تدريبيًا بأسلوب امتحان Goethe (20 لكل مستوى): استماع، قراءة، مفردات، وقواعد..
               اختر مستواك ثم اختر نموذجًا للبدء.
             </p>
           </div>
 
           <div className="pills" style={{ marginBottom: 20 }}>
-            {['A1', 'A2', 'B1'].map((l) => (
+            {['A1', 'A2', 'B1', 'B2'].map((l) => (
               <button
                 key={l}
                 className="pill"

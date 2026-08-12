@@ -69,7 +69,7 @@ export default function HomePage() {
         { icon: '🎧', label: 'مقطع استماع', value: stats.listening },
         { icon: '🗣️', label: 'سيناريو شفوي', value: stats.speaking },
         { icon: '✍️', label: 'مهمة كتابة', value: stats.writing },
-        { icon: '🎓', label: 'نموذج Goethe', value: 60 },
+        { icon: '🎓', label: 'نموذج Goethe', value: 80 },
       ]
     : [];
 

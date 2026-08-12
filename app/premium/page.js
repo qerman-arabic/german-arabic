@@ -27,7 +27,7 @@ export default function PremiumPage() {
       <div className="card" style={{ marginBottom: 18, lineHeight: 2 }}>
         <b>ماذا يفتح Premium؟</b>
         <ul style={{ margin: '8px 0 0', paddingLeft: 18 }}>
-          <li>60 نموذج Goethe كاملًا (بدل 5 لكل مستوى)</li>
+          <li>80 نموذج Goethe كاملًا (بدل 5 لكل مستوى)</li>
           <li>كل مقاطع الاستماع والقراءة والشفوي والكتابة</li>
           <li>معلم AI غير محدود (بدل 5 رسائل يوميًا)</li>
           <li>شهادات إتمام PDF باسمك</li>
