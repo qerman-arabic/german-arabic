@@ -230,7 +230,7 @@ export default function CertificatePage() {
                 </p>
 
                 <p style={{ color: 'rgba(255,255,255,.75)', fontSize: 13 }}>
-                  {c.done} درسًا — {new Date().toLocaleDateString('ar-EG')}
+                  {new Date().toLocaleDateString('ar-EG')}
                 </p>
 
                 <div
