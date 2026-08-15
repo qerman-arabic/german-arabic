@@ -19,9 +19,30 @@ export default function ResetPasswordPage() {
   const [msg, setMsg] = useState('');
   const [loading, setLoading] = useState(false);
   const [done, setDone] = useState(false);
+  const [ready, setReady] = useState(false);
+
+  useEffect(() => {
+    async function init() {
+      const raw =
+        window.location.hash.substring(1) || window.location.search.substring(1);
+      const params = new URLSearchParams(raw);
+      const access_token = params.get('access_token');
+      const refresh_token = params.get('refresh_token');
+
+      if (access_token && refresh_token) {
+        await supabase.auth.setSession({ access_token, refresh_token });
+        window.history.replaceState(null, '', window.location.pathname);
+      }
+
+      setReady(true);
+    }
+
+    init();
+  }, []);
 
   async function handleSubmit(e) {
     e.preventDefault();
+
     if (password.length < 6) {
       setMsg('كلمة المرور يجب أن تكون 6 أحرف على الأقل');
       return;
@@ -30,6 +51,7 @@ export default function ResetPasswordPage() {
       setMsg('كلمتا المرور غير متطابقتين');
       return;
     }
+
     setLoading(true);
     setMsg('');
 
@@ -38,7 +60,7 @@ export default function ResetPasswordPage() {
     if (error) {
       setMsg('خطأ: ' + error.message);
     } else {
-      setMsg('✅ تم تغيير كلمة المرور بنجاح. يمكنك الدخول الآن.');
+      setMsg('');
       setDone(true);
     }
     setLoading(false);
@@ -93,7 +115,9 @@ export default function ResetPasswordPage() {
             </div>
           ) : (
             <>
-              <label style={{ display: 'block', marginBottom: 6, fontWeight: 700 }}>كلمة المرور الجديدة</label>
+              <label style={{ display: 'block', marginBottom: 6, fontWeight: 700 }}>
+                كلمة المرور الجديدة
+              </label>
               <input
                 type="password"
                 value={password}
@@ -102,7 +126,9 @@ export default function ResetPasswordPage() {
                 minLength={6}
                 style={inputStyle}
               />
-              <label style={{ display: 'block', marginBottom: 6, fontWeight: 700 }}>تأكيد كلمة المرور</label>
+              <label style={{ display: 'block', marginBottom: 6, fontWeight: 700 }}>
+                تأكيد كلمة المرور
+              </label>
               <input
                 type="password"
                 value={confirm}
@@ -112,7 +138,7 @@ export default function ResetPasswordPage() {
                 style={inputStyle}
               />
               <button
-                disabled={loading}
+                disabled={loading || !ready}
                 style={{
                   width: '100%',
                   padding: 12,
