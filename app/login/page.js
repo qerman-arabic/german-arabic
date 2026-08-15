@@ -66,7 +66,9 @@ export default function LoginPage() {
     if (error) {
       setResetMsg('خطأ: ' + error.message);
     } else {
-      setResetMsg('✅ أرسلنا رابط استعادة كلمة المرور إلى بريدك. افتح الرابط خلال ساعة.');
+      setResetMsg(
+        '✅ أرسلنا رابط الاستعادة إلى بريدك — افتحه خلال ساعة. إن لم تجده خلال دقيقة، تفقد مجلد الرسائل المزعجة Spam.'
+      );
     }
     setResetLoading(false);
   }
