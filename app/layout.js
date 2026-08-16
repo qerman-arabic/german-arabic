@@ -2,14 +2,72 @@ import Script from 'next/script';
 import './globals.css';
 
 import { Analytics } from '@vercel/analytics/react';
-
 import AdminLink from '../components/AdminLink';
-
 import Footer from '../components/Footer';
 
 export const metadata = {
-  title: 'German بالعربي — تعلّم الألمانية',
-  description: 'منصة عربية متكاملة للتحضير لامتحان Goethe من A1 حتى B2',
+  metadataBase: new URL('https://german-arabic.vercel.app'),
+
+  title: {
+    default: 'German بالعربي — تعلّم الألمانية حتى امتحان Goethe',
+    template: '%s | German بالعربي',
+  },
+  description:
+    'منصة عربية متكاملة لتعلّم الألمانية من الصفر حتى امتحان Goethe: دروس، 80 نموذج امتحان، معلم ذكاء اصطناعي، وشهادات PDF باسمك. جرّبها مجانًا بدون تسجيل.',
+  keywords: [
+    'تعلم الألمانية',
+    'الألمانية بالعربية',
+    'امتحان Goethe',
+    'A1 A2 B1 B2',
+    'أوسبيلدونغ',
+    'الهجرة إلى ألمانيا',
+    'الدراسة في ألمانيا',
+  ],
+  authors: [{ name: 'German بالعربي' }],
+  creator: 'German بالعربي',
+  publisher: 'German بالعربي',
+  formatDetection: {
+    email: false,
+    address: false,
+    telephone: false,
+  },
+
+  openGraph: {
+    title: 'German بالعربي — تعلّم الألمانية حتى امتحان Goethe',
+    description:
+      'دروس بالعربية، 80 نموذج امتحان، معلم ذكاء اصطناعي يصححك فورًا، وشهادات باسمك. جرّبها مجانًا!',
+    url: 'https://german-arabic.vercel.app',
+    siteName: 'German بالعربي',
+    locale: 'ar_AR',
+    type: 'website',
+    images: [
+      {
+        url: '/logo.png',
+        width: 512,
+        height: 512,
+        alt: 'German بالعربي',
+      },
+    ],
+  },
+
+  twitter: {
+    card: 'summary_large_image',
+    title: 'German بالعربي — تعلّم الألمانية حتى Goethe',
+    description:
+      'منصة عربية كاملة: دروس + 80 نموذج + معلم AI + شهادات. جرّبها مجانًا!',
+    images: ['/logo.png'],
+  },
+
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
+  },
 };
 
 export default function RootLayout({ children }) {
