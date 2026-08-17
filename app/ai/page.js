@@ -154,11 +154,11 @@ export default function AIPage() {
         {loading && <p className="muted small">المعلم يكتب الرد...</p>}
       </div>
 
-      {locked ? (
+            {locked ? (
         <div className="card" style={{ textAlign: 'center' }}>
           {role === 'guest' ? (
             <>
-              <b> جربت المعلم! أعجبك الرد؟</b>
+              <b>👅 تذوّقت المعلم! أعجبك الرد؟</b>
               <p className="muted" style={{ margin: '6px 0 12px' }}>
                 سجّل حسابًا مجانيًا لتحصل على 5 رسائل يوميًا مع المعلم الذكي.
               </p>
@@ -175,7 +175,6 @@ export default function AIPage() {
             </>
           )}
         </div>
-      ) : (
       ) : (
         <div style={{ display: 'flex', gap: 10 }}>
           <input
