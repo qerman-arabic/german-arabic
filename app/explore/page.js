@@ -47,8 +47,18 @@ export default function ExplorePage() {
           <b style={{ color: '#FFCE00', fontSize: 16 }}>
             هديتك كزائر — بدون تسجيل:
           </b>
-          <div style={{ marginTop: 4, lineHeight: 1.9, color: '#e6fffa' }}>
-            3 عينات من كل قسم + رسالة مجانية يوميًا من المعلم الذكي 🤖
+          <div style={{ marginTop: 6, lineHeight: 2.1, color: '#e6fffa', fontSize: 14 }}>
+            🎁 3 عينات من كل قسم
+            <br />
+            🤖 رسالة مجانية يوميًا من المعلم الذكي
+            <br />
+            🎯{' '}
+            <a
+              href="/quiz"
+              style={{ color: '#FFCE00', fontWeight: 800, textDecoration: 'underline' }}
+            >
+              اختبار تحديد المستوى — اعرف مستواك في 5 دقائق
+            </a>
           </div>
         </div>
         <a
