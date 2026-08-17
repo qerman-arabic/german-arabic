@@ -156,11 +156,26 @@ export default function AIPage() {
 
       {locked ? (
         <div className="card" style={{ textAlign: 'center' }}>
-          <b>⏳ انتهت رسائل اليوم المجانية</b>
-          <p className="muted" style={{ margin: '6px 0 0' }}>
-            عد غدًا، أو افتح المحادثات غير المحدودة مع Premium.
-          </p>
+          {role === 'guest' ? (
+            <>
+              <b> جربت المعلم! أعجبك الرد؟</b>
+              <p className="muted" style={{ margin: '6px 0 12px' }}>
+                سجّل حسابًا مجانيًا لتحصل على 5 رسائل يوميًا مع المعلم الذكي.
+              </p>
+              <a className="btn btn-primary btn-lg" href="/register">
+                إنشاء حساب مجاني
+              </a>
+            </>
+          ) : (
+            <>
+              <b>⏳ انتهت رسائل اليوم المجانية</b>
+              <p className="muted" style={{ margin: '6px 0 0' }}>
+                عد غدًا، أو افتح المحادثات غير المحدودة مع Premium.
+              </p>
+            </>
+          )}
         </div>
+      ) : (
       ) : (
         <div style={{ display: 'flex', gap: 10 }}>
           <input
