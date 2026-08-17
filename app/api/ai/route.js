@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 
-const PREFERRED = ['gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-flash-latest'];
+const PREFERRED = ['gemini-3.6-flash', 'gemini-2.0-flash', 'gemini-flash-latest'];
 
 const SYSTEM =
   'أنت معلم لغة ألمانية ودود للناطقين باللغة العربية. أجب باختصار ووضوح، قدّم أمثلة ألمانية بسيطة، وصحح أخطاء المتعلم بلطف مع شرح قصير بالعربية. إذا طلب المستخدم محادثة، فاكتب جملة ألمانية بسيطة بمستواه واسأله سؤالًا ليكمل الحوار.';
