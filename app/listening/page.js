@@ -87,54 +87,6 @@ export default function ListeningPage() {
     const parts = lines.length > 0 ? lines : ['...'];
 
     function playPart(i) {
-      if (i >= parts.length) {
-        setPlaying('');
-        return;
-      }
-
-      const line = parts[i];
-      const female = i % 2 === 1;
-
-      const sources = [
-        'https://api.streamelements.com/kappa/v2/speech?voice=' +
-          (female ? 'Marlene' : 'Hans') +
-          '&text=' +
-          encodeURIComponent(line),
-      ];
-
-      if (VOICERSS_KEY && VOICERSS_KEY.length > 20 && !VOICERSS_KEY.includes('ضع')) {
-        sources.push(
-          'https://api.voicerss.org/?key=' +
-            VOICERSS_KEY +
-            '&hl=de-de&src=' +
-            encodeURIComponent(line)
-        );
-      }
-
-      function trySrc(s) {
-        if (s >= sources.length) {
-          speakLine(line, speed, () => playPart(i + 1));
-          return;
-        }
-
-        const audio = new Audio(sources[s]);
-        audioRef.current = audio;
-
-        const applyRate = () => {
-          audio.playbackRate = rateOf(speed);
-        };
-        audio.onloadedmetadata = applyRate;
-        audio.onended = () => playPart(i + 1);
-        audio.onerror = () => trySrc(s + 1);
-
-        audio.play().then(applyRate).catch(() => trySrc(s + 1));
-      }
-
-      trySrc(0);
-    }
-
-    playPart(0);
-  }
 
   function open(ex) {
     stopAll();
