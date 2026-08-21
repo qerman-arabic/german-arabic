@@ -40,47 +40,77 @@ export default function ListeningPage() {
     if ('speechSynthesis' in window) window.speechSynthesis.cancel();
   }
 
-  function speakFallback(text, speed) {
+  const TTS_SOURCES = [
+    (t) =>
+      'https://api.streamelements.com/kappa/v2/speech?voice=Hans&text=' +
+      encodeURIComponent(t),
+    (t) =>
+      'https://texttospeech.responsivevoice.org/getvoice.php?t=' +
+      encodeURIComponent(t) +
+      '&tl=de',
+  ];
+
+  function speakFixed(text, speed) {
     if (!('speechSynthesis' in window)) {
-      setToast('تعذر تشغيل الصوت على هذا الجهاز');
-      setTimeout(() => setToast(''), 2500);
+      setToast('جهازك لا يدعم تشغيل الصوت الألماني');
+      setTimeout(() => setToast(''), 3000);
       setPlaying('');
       return;
     }
 
-    const u = new SpeechSynthesisUtterance(text);
-    u.lang = 'de-DE';
-    u.rate = speed === 'slow' ? 0.6 : 0.95;
+    window.speechSynthesis.cancel();
 
-    const deVoice = window.speechSynthesis.getVoices().find((v) => v.lang.startsWith('de'));
-    if (deVoice) u.voice = deVoice;
+    setTimeout(() => {
+      const u = new SpeechSynthesisUtterance(text);
+      u.lang = 'de-DE';
+      u.rate = speed === 'slow' ? 0.6 : 0.95;
 
-    u.onend = () => setPlaying('');
-    u.onerror = () => setPlaying('');
-    window.speechSynthesis.speak(u);
+      const doSpeak = () => {
+        const v = window.speechSynthesis
+          .getVoices()
+          .find((x) => x.lang.toLowerCase().startsWith('de'));
+        if (v) u.voice = v;
+        u.onend = () => setPlaying('');
+        u.onerror = () => setPlaying('');
+        window.speechSynthesis.speak(u);
+      };
+
+      if (window.speechSynthesis.getVoices().length) doSpeak();
+      else {
+        window.speechSynthesis.onvoiceschanged = doSpeak;
+        setTimeout(doSpeak, 400);
+      }
+    }, 120);
   }
 
   function play(text, speed) {
     stopAll();
-
-    const url =
-      'https://api.streamelements.com/kappa/v2/speech?voice=Hans&text=' +
-      encodeURIComponent(text);
-
-    const audio = new Audio(url);
-    audioRef.current = audio;
-
-    const applyRate = () => {
-      audio.playbackRate = speed === 'slow' ? 0.6 : 0.95;
-    };
-    audio.onloadedmetadata = applyRate;
-    applyRate();
-
     setPlaying(speed);
-    audio.onended = () => setPlaying('');
-    audio.onerror = () => speakFallback(text, speed);
 
-    audio.play().catch(() => speakFallback(text, speed));
+    function trySource(i) {
+      if (i >= TTS_SOURCES.length) {
+        speakFixed(text, speed);
+        return;
+      }
+
+      const audio = new Audio(TTS_SOURCES[i](text));
+      audioRef.current = audio;
+
+      const applyRate = () => {
+        audio.playbackRate = speed === 'slow' ? 0.6 : 0.95;
+      };
+      audio.onloadedmetadata = applyRate;
+
+      audio.onended = () => setPlaying('');
+      audio.onerror = () => trySource(i + 1);
+
+      audio
+        .play()
+        .then(applyRate)
+        .catch(() => trySource(i + 1));
+    }
+
+    trySource(0);
   }
 
   function open(ex) {
