@@ -5,6 +5,8 @@ import { supabase } from '../../lib/supabase';
 import { useRole, LIMITS } from '../../lib/access';
 import Upsell from '../../components/Upsell';
 
+const VOICERSS_KEY = '0c2263233de54ab8b78716a6269c352e';
+
 export default function ListeningPage() {
   const { role, userId } = useRole();
   const [exercises, setExercises] = useState([]);
@@ -42,12 +44,13 @@ export default function ListeningPage() {
 
   const TTS_SOURCES = [
     (t) =>
-      'https://api.streamelements.com/kappa/v2/speech?voice=Hans&text=' +
+      'https://api.voicerss.org/?key=' +
+      VOICERSS_KEY +
+      '&hl=de-de&src=' +
       encodeURIComponent(t),
     (t) =>
-      'https://texttospeech.responsivevoice.org/getvoice.php?t=' +
-      encodeURIComponent(t) +
-      '&tl=de',
+      'https://api.streamelements.com/kappa/v2/speech?voice=Hans&text=' +
+      encodeURIComponent(t),
   ];
 
   function speakFixed(text, speed) {
@@ -69,7 +72,15 @@ export default function ListeningPage() {
         const v = window.speechSynthesis
           .getVoices()
           .find((x) => x.lang.toLowerCase().startsWith('de'));
-        if (v) u.voice = v;
+
+        if (!v) {
+          setToast('الصوت الألماني غير متوفر على هذا الجهاز — جرّب من جوال أندرويد');
+          setTimeout(() => setToast(''), 3500);
+          setPlaying('');
+          return;
+        }
+
+        u.voice = v;
         u.onend = () => setPlaying('');
         u.onerror = () => setPlaying('');
         window.speechSynthesis.speak(u);
