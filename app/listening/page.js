@@ -32,7 +32,10 @@ export default function ListeningPage() {
   }, []);
 
   const filtered = exercises.filter((e) => e.level_code === level);
-  const visible = filtered.slice(0, role === 'guest' && level !== 'A1' ? 0 : LIMITS[role].listening);
+  const visible = filtered.slice(
+    0,
+    role === 'guest' && level !== 'A1' ? 0 : LIMITS[role].listening
+  );
 
   function stopAll() {
     if (audioRef.current) {
@@ -42,56 +45,31 @@ export default function ListeningPage() {
     if ('speechSynthesis' in window) window.speechSynthesis.cancel();
   }
 
-  const TTS_SOURCES = [
-    (t) =>
-      'https://api.voicerss.org/?key=' +
-      VOICERSS_KEY +
-      '&hl=de-de&src=' +
-      encodeURIComponent(t),
-    (t) =>
-      'https://api.streamelements.com/kappa/v2/speech?voice=Hans&text=' +
-      encodeURIComponent(t),
-  ];
+  const rateOf = (speed) => (speed === 'slow' ? 0.6 : 0.95);
 
-  function speakFixed(text, speed) {
+  function speakLine(line, speed, onDone) {
     if (!('speechSynthesis' in window)) {
-      setToast('جهازك لا يدعم تشغيل الصوت الألماني');
-      setTimeout(() => setToast(''), 3000);
-      setPlaying('');
+      onDone();
       return;
     }
 
-    window.speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(line);
+    u.lang = 'de-DE';
+    u.rate = rateOf(speed);
 
-    setTimeout(() => {
-      const u = new SpeechSynthesisUtterance(text);
-      u.lang = 'de-DE';
-      u.rate = speed === 'slow' ? 0.6 : 0.95;
+    const v = window.speechSynthesis
+      .getVoices()
+      .find((x) => x.lang.toLowerCase().startsWith('de'));
 
-      const doSpeak = () => {
-        const v = window.speechSynthesis
-          .getVoices()
-          .find((x) => x.lang.toLowerCase().startsWith('de'));
+    if (!v) {
+      onDone();
+      return;
+    }
 
-        if (!v) {
-          setToast('الصوت الألماني غير متوفر على هذا الجهاز — جرّب من جوال أندرويد');
-          setTimeout(() => setToast(''), 3500);
-          setPlaying('');
-          return;
-        }
-
-        u.voice = v;
-        u.onend = () => setPlaying('');
-        u.onerror = () => setPlaying('');
-        window.speechSynthesis.speak(u);
-      };
-
-      if (window.speechSynthesis.getVoices().length) doSpeak();
-      else {
-        window.speechSynthesis.onvoiceschanged = doSpeak;
-        setTimeout(doSpeak, 400);
-      }
-    }, 120);
+    u.voice = v;
+    u.onend = onDone;
+    u.onerror = onDone;
+    window.speechSynthesis.speak(u);
   }
 
   function play(input, speed) {
@@ -107,23 +85,55 @@ export default function ListeningPage() {
       .filter((l) => l.length > 2);
 
     const parts = lines.length > 0 ? lines : ['...'];
-      audioRef.current = audio;
 
-      const applyRate = () => {
-        audio.playbackRate = speed === 'slow' ? 0.6 : 0.95;
-      };
-      audio.onloadedmetadata = applyRate;
+    function playPart(i) {
+      if (i >= parts.length) {
+        setPlaying('');
+        return;
+      }
 
-      audio.onended = () => setPlaying('');
-      audio.onerror = () => trySource(i + 1);
+      const line = parts[i];
+      const female = i % 2 === 1;
 
-      audio
-        .play()
-        .then(applyRate)
-        .catch(() => trySource(i + 1));
+      const sources = [
+        'https://api.streamelements.com/kappa/v2/speech?voice=' +
+          (female ? 'Marlene' : 'Hans') +
+          '&text=' +
+          encodeURIComponent(line),
+      ];
+
+      if (VOICERSS_KEY && VOICERSS_KEY.length > 20 && !VOICERSS_KEY.includes('ضع')) {
+        sources.push(
+          'https://api.voicerss.org/?key=' +
+            VOICERSS_KEY +
+            '&hl=de-de&src=' +
+            encodeURIComponent(line)
+        );
+      }
+
+      function trySrc(s) {
+        if (s >= sources.length) {
+          speakLine(line, speed, () => playPart(i + 1));
+          return;
+        }
+
+        const audio = new Audio(sources[s]);
+        audioRef.current = audio;
+
+        const applyRate = () => {
+          audio.playbackRate = rateOf(speed);
+        };
+        audio.onloadedmetadata = applyRate;
+        audio.onended = () => playPart(i + 1);
+        audio.onerror = () => trySrc(s + 1);
+
+        audio.play().then(applyRate).catch(() => trySrc(s + 1));
+      }
+
+      trySrc(0);
     }
 
-    trySource(0);
+    playPart(0);
   }
 
   function open(ex) {
@@ -200,7 +210,7 @@ export default function ListeningPage() {
                 onClick={() => open(ex)}
               >
                 <div style={{ fontWeight: 800, marginBottom: 4 }}>{ex.title_ar}</div>
-                <div className="muted small">استمع بالم سرعتين ثم أجب عن الأسئلة</div>
+                <div className="muted small">استمع بسرعتين ثم أجب عن الأسئلة</div>
               </button>
             ))}
           </div>
@@ -224,6 +234,7 @@ export default function ListeningPage() {
               ← كل المقاطع
             </button>
           </div>
+
           <div style={{ display: 'flex', gap: 10, marginBottom: 16, flexWrap: 'wrap' }}>
             <button className="btn btn-primary" onClick={() => play(current.script, 'normal')}>
               {playing === 'normal' ? '⏸ يعمل...' : '🔊 سرعة طبيعية'}
