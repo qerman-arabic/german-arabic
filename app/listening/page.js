@@ -87,6 +87,76 @@ export default function ListeningPage() {
     const parts = lines.length > 0 ? lines : ['...'];
 
     function playPart(i) {
+      if (i >= parts.length) {
+        setPlaying('');
+        return;
+      }
+
+      const line = parts[i];
+      const female = i % 2 === 1;
+      let advanced = false;
+
+      function advance() {
+        if (advanced) return;
+        advanced = true;
+        playPart(i + 1);
+      }
+
+      const sources = [
+        'https://api.streamelements.com/kappa/v2/speech?voice=' +
+          (female ? 'Marlene' : 'Hans') +
+          '&text=' +
+          encodeURIComponent(line),
+      ];
+
+      if (VOICERSS_KEY && VOICERSS_KEY.length > 20 && !VOICERSS_KEY.includes('ضع')) {
+        sources.push(
+          'https://api.voicerss.org/?key=' +
+            VOICERSS_KEY +
+            '&hl=de-de&src=' +
+            encodeURIComponent(line)
+        );
+      }
+
+      let srcIdx = 0;
+
+      function startSource() {
+        if (advanced) return;
+
+        if (srcIdx >= sources.length) {
+          advanced = true;
+          speakLine(line, speed, () => playPart(i + 1));
+          return;
+        }
+
+        let failed = false;
+        const audio = new Audio(sources[srcIdx]);
+        audioRef.current = audio;
+
+        const applyRate = () => {
+          audio.playbackRate = rateOf(speed);
+        };
+
+        const fail = () => {
+          if (failed || advanced) return;
+          failed = true;
+          audio.pause();
+          srcIdx += 1;
+          startSource();
+        };
+
+        audio.onloadedmetadata = applyRate;
+        audio.onended = advance;
+        audio.onerror = fail;
+
+        audio.play().then(applyRate).catch(fail);
+      }
+
+      startSource();
+    }
+
+    playPart(0);
+  }
 
   function open(ex) {
     stopAll();
@@ -144,7 +214,11 @@ export default function ListeningPage() {
                 onClick={() => setLevel(l)}
                 style={
                   level === l
-                    ? { background: 'var(--primary)', color: '#fff', borderColor: 'var(--primary)' }
+                    ? {
+                        background: 'var(--primary)',
+                        color: '#fff',
+                        borderColor: 'var(--primary)',
+                      }
                     : {}
                 }
               >
@@ -188,10 +262,16 @@ export default function ListeningPage() {
           </div>
 
           <div style={{ display: 'flex', gap: 10, marginBottom: 16, flexWrap: 'wrap' }}>
-            <button className="btn btn-primary" onClick={() => play(current.script, 'normal')}>
+            <button
+              className="btn btn-primary"
+              onClick={() => play(current.script, 'normal')}
+            >
               {playing === 'normal' ? '⏸ يعمل...' : '🔊 سرعة طبيعية'}
             </button>
-            <button className="btn btn-ghost" onClick={() => play(current.script, 'slow')}>
+            <button
+              className="btn btn-ghost"
+              onClick={() => play(current.script, 'slow')}
+            >
               {playing === 'slow' ? '⏸ يعمل...' : '🐢 سرعة بطيئة'}
             </button>
           </div>
