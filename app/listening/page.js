@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { supabase } from '../../lib/supabase';
 import { useRole, LIMITS } from '../../lib/access';
 import Upsell from '../../components/Upsell';
@@ -15,6 +15,7 @@ export default function ListeningPage() {
   const [result, setResult] = useState(null);
   const [playing, setPlaying] = useState('');
   const [toast, setToast] = useState('');
+  const audioRef = useRef(null);
 
   useEffect(() => {
     async function load() {
@@ -31,20 +32,59 @@ export default function ListeningPage() {
   const filtered = exercises.filter((e) => e.level_code === level);
   const visible = filtered.slice(0, role === 'guest' && level !== 'A1' ? 0 : LIMITS[role].listening);
 
-  function play(text, speed) {
-    if (!('speechSynthesis' in window)) return;
-    window.speechSynthesis.cancel();
+  function stopAll() {
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current = null;
+    }
+    if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+  }
+
+  function speakFallback(text, speed) {
+    if (!('speechSynthesis' in window)) {
+      setToast('تعذر تشغيل الصوت على هذا الجهاز');
+      setTimeout(() => setToast(''), 2500);
+      setPlaying('');
+      return;
+    }
 
     const u = new SpeechSynthesisUtterance(text);
     u.lang = 'de-DE';
     u.rate = speed === 'slow' ? 0.6 : 0.95;
 
-    setPlaying(speed);
+    const deVoice = window.speechSynthesis.getVoices().find((v) => v.lang.startsWith('de'));
+    if (deVoice) u.voice = deVoice;
+
     u.onend = () => setPlaying('');
+    u.onerror = () => setPlaying('');
     window.speechSynthesis.speak(u);
   }
 
+  function play(text, speed) {
+    stopAll();
+
+    const url =
+      'https://api.streamelements.com/kappa/v2/speech?voice=Hans&text=' +
+      encodeURIComponent(text);
+
+    const audio = new Audio(url);
+    audioRef.current = audio;
+
+    const applyRate = () => {
+      audio.playbackRate = speed === 'slow' ? 0.6 : 0.95;
+    };
+    audio.onloadedmetadata = applyRate;
+    applyRate();
+
+    setPlaying(speed);
+    audio.onended = () => setPlaying('');
+    audio.onerror = () => speakFallback(text, speed);
+
+    audio.play().catch(() => speakFallback(text, speed));
+  }
+
   function open(ex) {
+    stopAll();
     setCurrent(ex);
     setAnswers({});
     setSubmitted(false);
