@@ -94,17 +94,19 @@ export default function ListeningPage() {
     }, 120);
   }
 
-  function play(text, speed) {
+  function play(input, speed) {
     stopAll();
     setPlaying(speed);
 
-    function trySource(i) {
-      if (i >= TTS_SOURCES.length) {
-        speakFixed(text, speed);
-        return;
-      }
+    const raw = Array.isArray(input)
+      ? input.map((l) => (typeof l === 'string' ? l : l.t || l.text || ''))
+      : String(input || '').split(/\n/);
 
-      const audio = new Audio(TTS_SOURCES[i](text));
+    const lines = raw
+      .map((l) => String(l).replace(/^[-–—]/, '').replace(/[„"]/g, '').trim())
+      .filter((l) => l.length > 2);
+
+    const parts = lines.length > 0 ? lines : ['...'];
       audioRef.current = audio;
 
       const applyRate = () => {
@@ -222,12 +224,11 @@ export default function ListeningPage() {
               ← كل المقاطع
             </button>
           </div>
-
           <div style={{ display: 'flex', gap: 10, marginBottom: 16, flexWrap: 'wrap' }}>
-            <button className="btn btn-primary" onClick={() => play(current.text_de, 'normal')}>
+            <button className="btn btn-primary" onClick={() => play(current.script, 'normal')}>
               {playing === 'normal' ? '⏸ يعمل...' : '🔊 سرعة طبيعية'}
             </button>
-            <button className="btn btn-ghost" onClick={() => play(current.text_de, 'slow')}>
+            <button className="btn btn-ghost" onClick={() => play(current.script, 'slow')}>
               {playing === 'slow' ? '⏸ يعمل...' : '🐢 سرعة بطيئة'}
             </button>
           </div>
