@@ -156,8 +156,8 @@ export default function LoginPage() {
         </p>
       </div>
 
-  async function google() {
-    await supabase.auth.signInWithOAuth({
+  function google() {
+    supabase.auth.signInWithOAuth({
       provider: 'google',
       options: { redirectTo: window.location.origin + '/dashboard' },
     });
