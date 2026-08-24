@@ -86,6 +86,45 @@ export default function RegisterPage() {
           </p>
         </div>
 
+  async function google() {
+    await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: { redirectTo: window.location.origin + '/dashboard' },
+    });
+  }
+          <button
+            type="button"
+            onClick={google}
+            style={{
+              width: '100%',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: 10,
+              padding: '12px 0',
+              borderRadius: 12,
+              border: '1px solid #ddd',
+              background: '#fff',
+              fontWeight: 800,
+              cursor: 'pointer',
+              marginBottom: 12,
+            }}
+          >
+            <span style={{ fontSize: 18 }}>🇬</span>
+            متابعة عبر Google
+          </button>
+
+          <div
+            style={{
+              textAlign: 'center',
+              color: 'var(--muted)',
+              fontSize: 12,
+              margin: '0 0 12px',
+            }}
+          >
+            — أو بالبريد وكلمة السر —
+          </div>
+
         <p style={{ textAlign: 'center', marginTop: 14 }}>
           <a className="link" href="/">← الصفحة الرئيسية</a>
         </p>

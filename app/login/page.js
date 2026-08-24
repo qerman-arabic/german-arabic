@@ -156,6 +156,13 @@ export default function LoginPage() {
         </p>
       </div>
 
+  async function google() {
+    await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: { redirectTo: window.location.origin + '/dashboard' },
+    });
+  }
+
       {resetOpen && (
         <div
           onClick={() => setResetOpen(false)}
