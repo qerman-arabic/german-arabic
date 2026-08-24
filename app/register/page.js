@@ -58,10 +58,13 @@ export default function RegisterPage() {
               gap: 10,
               padding: '12px 0',
               borderRadius: 12,
-              border: '1px solid #ddd',
-              background: '#fff',
+                         border: 'none',
+              background: '#0d9488',
+              color: '#fff',
               fontWeight: 800,
               cursor: 'pointer',
+              marginBottom: 12,
+              boxShadow: '0 4px 14px rgba(13,148,136,.35)',
               marginBottom: 12,
             }}
           >
