@@ -73,6 +73,13 @@ export default function LoginPage() {
     setResetLoading(false);
   }
 
+  function google() {
+    supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: { redirectTo: window.location.origin + '/dashboard' },
+    });
+  }
+
   return (
     <main
       dir="rtl"
@@ -92,8 +99,7 @@ export default function LoginPage() {
           German بالعربي 🇩🇪
         </p>
 
-        <form
-          onSubmit={handleLogin}
+        <div
           style={{
             background: '#fff',
             border: '1px solid #e2e8f0',
@@ -101,52 +107,87 @@ export default function LoginPage() {
             padding: 20,
           }}
         >
-          <label style={{ display: 'block', marginBottom: 6, fontWeight: 700 }}>البريد الإلكتروني</label>
-          <input
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-            placeholder="example@mail.com"
-            style={inputStyle}
-          />
-
-          <label style={{ display: 'block', marginBottom: 6, fontWeight: 700 }}>كلمة المرور</label>
-          <input
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-            placeholder="******"
-            style={inputStyle}
-          />
-
-          <button disabled={loading} style={buttonStyle}>
-            {loading ? 'جارٍ الدخول...' : 'دخول'}
+          <button
+            type="button"
+            onClick={google}
+            style={{
+              width: '100%',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: 10,
+              padding: '12px 0',
+              borderRadius: 12,
+              border: '1px solid #ddd',
+              background: '#fff',
+              fontWeight: 800,
+              cursor: 'pointer',
+              marginBottom: 12,
+            }}
+          >
+            <span style={{ fontSize: 18 }}>🇬</span>
+            متابعة عبر Google
           </button>
 
-          <div style={{ textAlign: 'center', marginTop: 12 }}>
-            <button
-              type="button"
-              onClick={() => { setResetOpen(true); setResetEmail(email); setResetMsg(''); }}
-              style={{
-                background: 'none',
-                border: 'none',
-                color: '#0f766e',
-                fontWeight: 700,
-                cursor: 'pointer',
-                fontSize: 14,
-                textDecoration: 'underline',
-              }}
-            >
-              نسيت كلمة المرور؟
-            </button>
+          <div
+            style={{
+              textAlign: 'center',
+              color: '#64748b',
+              fontSize: 12,
+              margin: '0 0 16px',
+            }}
+          >
+            — أو بالبريد وكلمة السر —
           </div>
 
-          {message && (
-            <div style={{ marginTop: 12, color: '#dc2626', fontWeight: 700 }}>{message}</div>
-          )}
-        </form>
+          <form onSubmit={handleLogin}>
+            <label style={{ display: 'block', marginBottom: 6, fontWeight: 700 }}>البريد الإلكتروني</label>
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              placeholder="example@mail.com"
+              style={inputStyle}
+            />
+
+            <label style={{ display: 'block', marginBottom: 6, fontWeight: 700 }}>كلمة المرور</label>
+            <input
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              placeholder="******"
+              style={inputStyle}
+            />
+
+            <button disabled={loading} style={buttonStyle}>
+              {loading ? 'جارٍ الدخول...' : 'دخول'}
+            </button>
+
+            <div style={{ textAlign: 'center', marginTop: 12 }}>
+              <button
+                type="button"
+                onClick={() => { setResetOpen(true); setResetEmail(email); setResetMsg(''); }}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  color: '#0f766e',
+                  fontWeight: 700,
+                  cursor: 'pointer',
+                  fontSize: 14,
+                  textDecoration: 'underline',
+                }}
+              >
+                نسيت كلمة المرور؟
+              </button>
+            </div>
+
+            {message && (
+              <div style={{ marginTop: 12, color: '#dc2626', fontWeight: 700 }}>{message}</div>
+            )}
+          </form>
+        </div>
 
         <p style={{ textAlign: 'center', marginTop: 14, color: '#64748b' }}>
           ليس لديك حساب؟{' '}
@@ -155,13 +196,6 @@ export default function LoginPage() {
           </a>
         </p>
       </div>
-
-  function google() {
-    supabase.auth.signInWithOAuth({
-      provider: 'google',
-      options: { redirectTo: window.location.origin + '/dashboard' },
-    });
-  }
 
       {resetOpen && (
         <div
