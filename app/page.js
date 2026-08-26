@@ -10,18 +10,6 @@ const FEATURES = [
   { icon: '🏅', title: 'شهادات إتمام', desc: 'شهادة PDF باسمك عند إنهاء كل مستوى، بنقاط وسلسلة أيام.' },
 ];
 
-const flagStyle = {
-  display: 'inline-flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  width: 30,
-  height: 30,
-  borderRadius: '50%',
-  background: '#fff',
-  border: '2px solid #e2e8f0',
-  fontSize: 16,
-};
-
 export default function HomePage() {
   const [stats, setStats] = useState(null);
   const [installEvt, setInstallEvt] = useState(null);
@@ -183,27 +171,6 @@ export default function HomePage() {
               ✅ التطبيق مثبت على جهازك
             </span>
           )}
-        </div>
-
-        <div
-          style={{
-            marginTop: 22,
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
-            gap: 10,
-            flexWrap: 'wrap',
-          }}
-        >
-          <div style={{ display: 'flex' }}>
-            <span style={flagStyle}>🇪🇬</span>
-            <span style={{ ...flagStyle, marginLeft: -8 }}>🇩🇿</span>
-            <span style={{ ...flagStyle, marginLeft: -8 }}>🇸</span>
-            <span style={{ ...flagStyle, marginLeft: -8 }}>🇦🇪</span>
-          </div>
-          <span className="muted small" style={{ fontWeight: 800 }}>
-            انضم إلى +30 متعلمًا عربيًا يبنون طريقهم نحو ألمانيا 🇩
-          </span>
         </div>
 
         {iosHint && (
