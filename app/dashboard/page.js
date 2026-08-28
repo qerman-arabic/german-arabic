@@ -16,6 +16,7 @@ export default function DashboardPage() {
   const [planOpen, setPlanOpen] = useState(false);
   const [planLevel, setPlanLevel] = useState('B1');
   const [planDate, setPlanDate] = useState('');
+  const [prefillChecked, setPrefillChecked] = useState(false);
 
   useEffect(() => {
     async function load() {
@@ -53,6 +54,18 @@ export default function DashboardPage() {
       );
       setPlanLevel(profileRes.data?.plan_level || 'B1');
       setPlanDate(profileRes.data?.plan_exam_date || '');
+
+      // ===== اكتشاف prefill من اختبار المستوى =====
+      if (typeof window !== 'undefined' && !prefillChecked) {
+        const prefill = localStorage.getItem('prefill_plan_level');
+        if (prefill && !profileRes.data?.plan_exam_date) {
+          setPlanLevel(prefill);
+          setPlanOpen(true);
+          localStorage.removeItem('prefill_plan_level');
+        }
+        setPrefillChecked(true);
+      }
+
       setLoading(false);
     }
 

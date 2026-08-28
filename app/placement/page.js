@@ -78,6 +78,13 @@ export default function PlacementPage() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
+  function createPlan() {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('prefill_plan_level', result.rec);
+    }
+    window.location.href = '/dashboard';
+  }
+
   return (
     <main className="container">
       <div className="page-head">
@@ -114,12 +121,19 @@ export default function PlacementPage() {
               : `تحليلك يظهر أنك تتقن ما قبل ${result.rec} وتحتاج البدء منه. خطتك جاهزة في لوحة التعلم.`}
           </p>
           <div style={{ display: 'flex', gap: 10, justifyContent: 'center', marginTop: 14, flexWrap: 'wrap' }}>
-            <a className="btn btn-lg" style={{ background: '#fff', color: '#0f766e' }} href="/dashboard">
-              ابدأ التعلم من {result.rec}
+            <button
+              className="btn btn-lg"
+              style={{ background: '#fff', color: '#0f766e', fontWeight: 900 }}
+              onClick={createPlan}
+            >
+              🗓️ أنشئ خطتي بمستوى {result.rec}
+            </button>
+            <a className="btn btn-lg" style={{ background: 'rgba(255,255,255,.2)', color: '#fff' }} href="/dashboard">
+              ابدأ التعلم مباشرة
             </a>
             <button
               className="btn btn-lg"
-              style={{ background: 'rgba(255,255,255,.2)', color: '#fff' }}
+              style={{ background: 'rgba(255,255,255,.15)', color: '#fff' }}
               onClick={() => {
                 setResult(null);
                 setAnswers({});
