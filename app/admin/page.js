@@ -11,6 +11,7 @@ export default function AdminPage() {
   const [tab, setTab] = useState('words');
   const [levels, setLevels] = useState([]);
   const [users, setUsers] = useState([]);
+  const [requests, setRequests] = useState([]);
   const [toast, setToast] = useState('');
 
   const [wLesson, setWLesson] = useState('');
@@ -51,16 +52,18 @@ export default function AdminPage() {
 
       setAllowed(true);
 
-      const [lv, us] = await Promise.all([
+      const [lv, us, req] = await Promise.all([
         supabase
           .from('levels')
           .select('*, modules(*, lessons(id, title_ar))')
           .order('sort_order'),
         supabase.from('profiles').select('*').order('points', { ascending: false }),
+        supabase.from('payment_requests').select('*').order('created_at', { ascending: false }),
       ]);
 
       setLevels(lv.data || []);
       setUsers(us.data || []);
+      setRequests(req.data || []);
       setLoading(false);
     }
 
@@ -78,6 +81,41 @@ export default function AdminPage() {
       .select('*')
       .order('points', { ascending: false });
     setUsers(data || []);
+  }
+
+  async function refreshRequests() {
+    const { data } = await supabase
+      .from('payment_requests')
+      .select('*')
+      .order('created_at', { ascending: false });
+    setRequests(data || []);
+  }
+
+  async function fulfillRequest(req) {
+    const user = users.find((u) => u.email === req.email);
+    if (!user) return showToast('لم نجد مستخدمًا بهذا البريد: ' + req.email);
+
+    const daysMap = { 'شهر امتحان': 30, '3 أشهر': 90, 'سنة كاملة': 365 };
+    const days = daysMap[req.plan] || 30;
+
+    const until = new Date(Date.now() + days * 86400000).toISOString();
+    const { error: upErr } = await supabase.from('profiles').update({
+      is_premium: true,
+      premium_until: until,
+    }).eq('id', user.id);
+
+    if (upErr) return showToast('خطأ في التفعيل: ' + upErr.message);
+
+    await supabase.from('payment_requests').update({ status: 'fulfilled' }).eq('id', req.id);
+    showToast('تم تفعيل ' + req.email + ' ✅ (' + days + ' يومًا)');
+    refreshRequests();
+    refreshUsers();
+  }
+
+  async function rejectRequest(id) {
+    await supabase.from('payment_requests').update({ status: 'rejected' }).eq('id', id);
+    showToast('تم رفض الطلب');
+    refreshRequests();
   }
 
   async function setPremium(userId, days) {
@@ -213,6 +251,7 @@ export default function AdminPage() {
 
       <div className="pills" style={{ marginBottom: 20 }}>
         {[
+          ['requests', 'طلبات الدفع 💰'],
           ['users', 'المستخدمون 👥'],
           ['words', 'كلمات 📖'],
           ['lessons', 'دروس 📘'],
@@ -233,6 +272,68 @@ export default function AdminPage() {
           </button>
         ))}
       </div>
+
+      {tab === 'requests' && (
+        <div style={{ display: 'grid', gap: 12 }}>
+          {requests.length === 0 && (
+            <div className="card" style={{ textAlign: 'center' }}>
+              <div style={{ fontSize: 40, marginBottom: 8 }}>📭</div>
+              <p className="muted">لا توجد طلبات حتى الآن.</p>
+            </div>
+          )}
+          {requests.map((r) => {
+            const isPending = r.status === 'pending';
+            return (
+              <div
+                key={r.id}
+                className="card"
+                style={{
+                  opacity: isPending ? 1 : 0.55,
+                  borderLeft: isPending ? '4px solid var(--primary)' : '4px solid #e2e8f0',
+                }}
+              >
+                <div
+                  style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    flexWrap: 'wrap',
+                    gap: 8,
+                    marginBottom: 10,
+                  }}
+                >
+                  <div>
+                    <b>{r.plan}</b>
+                    <div dir="ltr" style={{ textAlign: 'right', color: '#475569', fontSize: 13 }}>
+                      {r.email}
+                    </div>
+                  </div>
+                  <div className="muted small" style={{ fontWeight: 900, fontSize: 18, color: 'var(--primary-dark)' }}>
+                    {r.amount}$
+                    {!isPending && (
+                      <span style={{ fontSize: 12, marginRight: 6, color: '#64748b' }}>
+                        {r.status === 'fulfilled' ? ' ✅' : ' ❌'}
+                      </span>
+                    )}
+                  </div>
+                </div>
+                <div className="muted small" style={{ marginBottom: 10 }}>
+                  {new Date(r.created_at).toLocaleString('ar-EG')}
+                </div>
+                {isPending && (
+                  <div style={{ display: 'flex', gap: 8 }}>
+                    <button className="btn btn-primary" onClick={() => fulfillRequest(r)}>
+                      ✅ تفعيل الاشتراك
+                    </button>
+                    <button className="btn btn-ghost" onClick={() => rejectRequest(r.id)}>
+                      رفض
+                    </button>
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      )}
 
       {tab === 'users' && (
         <div style={{ display: 'grid', gap: 12 }}>
@@ -325,7 +426,7 @@ export default function AdminPage() {
             <select className="input" value={lModule} onChange={(e) => setLModule(e.target.value)} required>
               <option value="">اختر وحدة...</option>
               {allModules.map((m) => (
-                <option key={m.id} value={m.label}>{m.label}</option>
+                <option key={m.id} value={m.id}>{m.label}</option>
               ))}
             </select>
           </div>
