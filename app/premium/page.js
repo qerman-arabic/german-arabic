@@ -4,8 +4,8 @@ import { useRole } from '../../lib/access';
 
 const PLANS = [
   { name: 'شهر امتحان', price: '10$', per: 'لمدة 30 يومًا', hot: false },
-  { name: '3 أشهر', price: '25$', per: 'الأكثر اختيارًا — 17$/شهر', hot: true },
-  { name: 'سنة, price: '80$', per: 'تاكد انك ستكون الافضل', hot: false },
+  { name: '3 أشهر', price: '25$', per: 'الأكثر اختيارًا — $8/شهر', hot: true },
+  { name: 'سنة كاملة', price: '80$', per: 'خصم 30% — استثمار حقيقي', hot: false },
 ];
 
 export default function PremiumPage() {
@@ -42,7 +42,7 @@ export default function PremiumPage() {
           <li>امتحان Goethe الواحد = 100$ إلى 200$</li>
           <li>
             منصتنا — لمدة سنة ={' '}
-            <b style={{ color: '#16a34a' }}>80$ فقط ✅</b>
+            <b style={{ color: '#16a34a' }}>80$ فقط (خصم 30%) ✅</b>
           </li>
         </ul>
       </div>
@@ -97,7 +97,7 @@ export default function PremiumPage() {
             «Add a note / إضافة ملاحظة».
           </li>
           <li>أتمم الدفع — يصلنا بريدك مع المعاملة ونفعّل اشتراكك خلال 24 ساعة. ✅</li>
-        </ol> 
+        </ol>
 
         <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginTop: 14 }}>
           <a className="btn btn-primary btn-lg" href="https://paypal.me/germanarabic/10" target="_blank" rel="noreferrer">
@@ -107,7 +107,7 @@ export default function PremiumPage() {
             💙 ادفع 25$ — 3 أشهر
           </a>
           <a className="btn btn-primary btn-lg" href="https://paypal.me/germanarabic/80" target="_blank" rel="noreferrer">
-            💙 ادفع 80$ — سنة مع تخفيض 30%
+            💙 ادفع 80$ — سنة كاملة (خصم 30%)
           </a>
         </div>
       </div>
