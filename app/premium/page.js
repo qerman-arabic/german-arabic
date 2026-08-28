@@ -99,6 +99,7 @@ export default function PremiumPage() {
           </li>
           <li>أتمم الدفع — يصلنا بريدك مع المعاملة ونفعّل اشتراكك خلال 24 ساعة. ✅</li>
         </ol>
+
         <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginTop: 14 }}>
           <a className="btn btn-primary btn-lg" href="https://paypal.me/germanarabic/10" target="_blank" rel="noreferrer">
             💙 ادفع 10$ — شهر امتحان
@@ -111,18 +112,15 @@ export default function PremiumPage() {
           </a>
         </div>
 
-        <div style={{ marginTop: 18, paddingTop: 18, borderTop: '1px dashed var(--line)' }}>
+        <div style={{ marginTop: 18, paddingTop: 18, borderTop: '1px dashed #e2e8f0' }}>
           <p className="muted small" style={{ textAlign: 'center', marginBottom: 12 }}>
-            🎯 دفعت عبر PayPal؟ أكّد طلبك لنفعّل اشتراكك:
+            🎯 دفعت عبر PayPal؟ أكّد طلبك لنفعّل اشتراكك بسرعة:
           </p>
           <div style={{ display: 'grid', gap: 10 }}>
             <PaymentConfirm plan="شهر امتحان" amount={10} />
             <PaymentConfirm plan="3 أشهر" amount={25} />
             <PaymentConfirm plan="سنة كاملة" amount={80} />
           </div>
-        </div>
-
-          </a>
         </div>
       </div>
     </main>
