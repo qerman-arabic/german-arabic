@@ -3,9 +3,9 @@
 import { useRole } from '../../lib/access';
 
 const PLANS = [
-  { name: 'شهر امتحان', price: '20$', per: 'لمدة 30 يومًا', hot: false },
-  { name: '3 أشهر', price: '50$', per: 'الأكثر اختيارًا — 17$/شهر', hot: true },
-  { name: 'وصول دائم', price: '200$', per: 'ادفع مرة واحدة للأبد', hot: false },
+  { name: 'شهر امتحان', price: '10$', per: 'لمدة 30 يومًا', hot: false },
+  { name: '3 أشهر', price: '30$', per: 'الأكثر اختيارًا — 17$/شهر', hot: true },
+  { name: 'وصول دائم', price: '150$', per: 'ادفع مرة واحدة للأبد', hot: false },
 ];
 
 export default function PremiumPage() {

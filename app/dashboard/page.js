@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { supabase } from '../../lib/supabase';
+import OfferNote from '../../components/OfferNote';
 
 const ADMIN_EMAIL = 'moayad.ahmad2014@gmail.com';
 
@@ -393,6 +394,7 @@ export default function DashboardPage() {
           );
         })}
       </div>
+      <OfferNote />
     </main>
   );
 }
