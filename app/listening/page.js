@@ -17,6 +17,7 @@ export default function ListeningPage() {
   const [result, setResult] = useState(null);
   const [playing, setPlaying] = useState('');
   const [toast, setToast] = useState('');
+  const [showScript, setShowScript] = useState(false);
   const audioRef = useRef(null);
 
   useEffect(() => {
@@ -158,12 +159,23 @@ export default function ListeningPage() {
     playPart(0);
   }
 
+  // ===== استخراج الحوار كسطور =====
+  function getScriptLines(input) {
+    const raw = Array.isArray(input)
+      ? input.map((l) => (typeof l === 'string' ? l : l.t || l.text || ''))
+      : String(input || '').split(/\n/);
+    return raw
+      .map((l) => String(l).replace(/^[-–—]/, '').replace(/[„"]/g, '').trim())
+      .filter((l) => l.length > 2);
+  }
+
   function open(ex) {
     stopAll();
     setCurrent(ex);
     setAnswers({});
     setSubmitted(false);
     setResult(null);
+    setShowScript(false);
   }
 
   function select(qi, oi) {
@@ -303,17 +315,82 @@ export default function ListeningPage() {
               تحقق من إجاباتك
             </button>
           ) : (
-            <div
-              className="card"
-              style={{
-                textAlign: 'center',
-                background: result.correct === result.total ? '#f0fdf4' : '#fffbeb',
-              }}
-            >
-              <b style={{ fontSize: 20 }}>
-                نتيجتك: {result.correct} من {result.total}
-              </b>
-            </div>
+            <>
+              <div
+                className="card"
+                style={{
+                  textAlign: 'center',
+                  background: result.correct === result.total ? '#f0fdf4' : '#fffbeb',
+                  marginBottom: 12,
+                }}
+              >
+                <b style={{ fontSize: 20 }}>
+                  نتيجتك: {result.correct} من {result.total}
+                </b>
+              </div>
+
+              <button
+                className="btn btn-ghost btn-lg"
+                onClick={() => setShowScript((v) => !v)}
+                style={{
+                  width: '100%',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: 8,
+                }}
+              >
+                <span style={{ fontSize: 18 }}>📜</span>
+                {showScript ? 'أخفِ النص' : 'أظهر النص الكامل'}
+              </button>
+
+              {showScript && (
+                <div
+                  className="card"
+                  style={{
+                    marginTop: 12,
+                    background: '#f8fafc',
+                    border: '1px dashed #cbd5e1',
+                  }}
+                >
+                  <b style={{ display: 'block', marginBottom: 10, fontSize: 15 }}>
+                    📖 نص الحوار — اقرأه مع الاستماع
+                  </b>
+                  <div style={{ display: 'grid', gap: 8 }}>
+                    {getScriptLines(current.script).map((line, i) => {
+                      const female = i % 2 === 1;
+                      return (
+                        <div
+                          key={i}
+                          dir="ltr"
+                          style={{
+                            display: 'flex',
+                            gap: 10,
+                            alignItems: 'flex-start',
+                            padding: '8px 10px',
+                            background: female ? '#fef3c7' : '#e0f2fe',
+                            borderRadius: 10,
+                            textAlign: 'left',
+                          }}
+                        >
+                          <span style={{ fontSize: 20, flexShrink: 0 }}>
+                            {female ? '👩' : '👨'}
+                          </span>
+                          <div style={{ flex: 1, lineHeight: 1.8 }}>
+                            <div style={{ fontWeight: 700, fontSize: 12, color: '#475569', marginBottom: 2 }}>
+                              {female ? 'Sie' : 'Er'}
+                            </div>
+                            <div style={{ fontSize: 15, color: '#0f172a' }}>
+                              {line}
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+            </>
           )}
         </div>
       )}
