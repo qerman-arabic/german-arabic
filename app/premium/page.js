@@ -4,8 +4,8 @@ import { useRole } from '../../lib/access';
 
 const PLANS = [
   { name: 'شهر امتحان', price: '10$', per: 'لمدة 30 يومًا', hot: false },
-  { name: '3 أشهر', price: '30$', per: 'الأكثر اختيارًا — 17$/شهر', hot: true },
-  { name: 'وصول دائم', price: '100$', per: 'ادفع مرة واحدة للأبد', hot: false },
+  { name: '3 أشهر', price: '25$', per: 'الأكثر اختيارًا — 17$/شهر', hot: true },
+  { name: 'سنة, price: '80$', per: 'تاكد انك ستكون الافضل', hot: false },
 ];
 
 export default function PremiumPage() {
@@ -41,8 +41,8 @@ export default function PremiumPage() {
           <li>دورة خاصة + كتب + سفر = 500$ وأكثر</li>
           <li>امتحان Goethe الواحد = 100$ إلى 200$</li>
           <li>
-            منصتنا — كل شيء معًا للأبد ={' '}
-            <b style={{ color: '#16a34a' }}>100$ فقط ✅</b>
+            منصتنا — لمدة سنة ={' '}
+            <b style={{ color: '#16a34a' }}>80$ فقط ✅</b>
           </li>
         </ul>
       </div>
@@ -100,14 +100,14 @@ export default function PremiumPage() {
         </ol> 
 
         <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginTop: 14 }}>
-          <a className="btn btn-primary btn-lg" href="https://paypal.me/germanarabic/20" target="_blank" rel="noreferrer">
+          <a className="btn btn-primary btn-lg" href="https://paypal.me/germanarabic/10" target="_blank" rel="noreferrer">
             💙 ادفع 10$ — شهر امتحان
           </a>
-          <a className="btn btn-primary btn-lg" href="https://paypal.me/germanarabic/50" target="_blank" rel="noreferrer">
-            💙 ادفع 30$ — 3 أشهر
+          <a className="btn btn-primary btn-lg" href="https://paypal.me/germanarabic/25" target="_blank" rel="noreferrer">
+            💙 ادفع 25$ — 3 أشهر
           </a>
-          <a className="btn btn-primary btn-lg" href="https://paypal.me/germanarabic/200" target="_blank" rel="noreferrer">
-            💙 ادفع 100$ — وصول دائم
+          <a className="btn btn-primary btn-lg" href="https://paypal.me/germanarabic/80" target="_blank" rel="noreferrer">
+            💙 ادفع 80$ — سنة مع تخفيض 30%
           </a>
         </div>
       </div>
