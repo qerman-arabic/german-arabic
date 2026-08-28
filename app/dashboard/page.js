@@ -105,6 +105,15 @@ export default function DashboardPage() {
     );
   }
 
+  // ===== نص نوع الاشتراك بناءً على الأيام =====
+  function getPlanLabel(days) {
+    if (days === null) return 'وصول دائم 💎';
+    if (days > 300) return 'يومًا (اشتراك سنة) 💎';
+    if (days > 60) return 'يومًا (3 أشهر) 💎';
+    if (days <= 3) return 'يومًا متبقيًا ⏰';
+    return 'يومًا متبقيًا 💎';
+  }
+
   // ===== حسابات الخطة =====
   const daysLeft = profile?.plan_exam_date
     ? Math.ceil((new Date(profile.plan_exam_date) - new Date()) / 86400000)
@@ -167,14 +176,8 @@ export default function DashboardPage() {
                     : 'rgba(16, 185, 129, .35)',
               }}
             >
-              <b>{premiumLeft !== null ? premiumLeft : '♾️'}</b>
-              <span>
-                {premiumLeft !== null
-                  ? premiumLeft <= 3
-                    ? 'يومًا متبقيًا ⏰'
-                    : 'يومًا متبقيًا 💎'
-                  : 'سنه💎'}
-              </span>
+              <b>{premiumLeft !== null ? premiumLeft : '💎'}</b>
+              <span>{getPlanLabel(premiumLeft)}</span>
             </div>
           )}
           {daysLeft !== null && daysLeft >= 0 && (
@@ -346,7 +349,7 @@ export default function DashboardPage() {
       </div>
 
       {/* المستويات */}
-      <h2 className="section-title">مستويات التعلم 🇩</h2>
+      <h2 className="section-title">مستويات التعلم 🇩🇪</h2>
 
       <div style={{ display: 'grid', gap: 14 }}>
         {levels.map((level) => {

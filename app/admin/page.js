@@ -10,6 +10,7 @@ export default function AdminPage() {
   const [allowed, setAllowed] = useState(false);
   const [tab, setTab] = useState('words');
   const [levels, setLevels] = useState([]);
+  const [users, setUsers] = useState([]);
   const [toast, setToast] = useState('');
 
   const [wLesson, setWLesson] = useState('');
@@ -50,12 +51,16 @@ export default function AdminPage() {
 
       setAllowed(true);
 
-      const { data: lv } = await supabase
-        .from('levels')
-        .select('*, modules(*, lessons(id, title_ar))')
-        .order('sort_order');
+      const [lv, us] = await Promise.all([
+        supabase
+          .from('levels')
+          .select('*, modules(*, lessons(id, title_ar))')
+          .order('sort_order'),
+        supabase.from('profiles').select('*').order('points', { ascending: false }),
+      ]);
 
-      setLevels(lv || []);
+      setLevels(lv.data || []);
+      setUsers(us.data || []);
       setLoading(false);
     }
 
@@ -65,6 +70,45 @@ export default function AdminPage() {
   function showToast(message) {
     setToast(message);
     setTimeout(() => setToast(''), 2500);
+  }
+
+  async function refreshUsers() {
+    const { data } = await supabase
+      .from('profiles')
+      .select('*')
+      .order('points', { ascending: false });
+    setUsers(data || []);
+  }
+
+  async function setPremium(userId, days) {
+    const until = new Date(Date.now() + days * 86400000).toISOString();
+    const { error } = await supabase
+      .from('profiles')
+      .update({ is_premium: true, premium_until: until })
+      .eq('id', userId);
+    if (error) return showToast('خطأ: ' + error.message);
+    showToast('تم التفعيل ✅ (' + days + ' يومًا)');
+    refreshUsers();
+  }
+
+  async function setPermanent(userId) {
+    const { error } = await supabase
+      .from('profiles')
+      .update({ is_premium: true, premium_until: null })
+      .eq('id', userId);
+    if (error) return showToast('خطأ: ' + error.message);
+    showToast('تم التفعيل دائمًا ✅');
+    refreshUsers();
+  }
+
+  async function removePremium(userId) {
+    const { error } = await supabase
+      .from('profiles')
+      .update({ is_premium: false, premium_until: null })
+      .eq('id', userId);
+    if (error) return showToast('خطأ: ' + error.message);
+    showToast('تم إلغاء الاشتراك');
+    refreshUsers();
   }
 
   const allLessons = (levels || []).flatMap((lv) =>
@@ -169,6 +213,7 @@ export default function AdminPage() {
 
       <div className="pills" style={{ marginBottom: 20 }}>
         {[
+          ['users', 'المستخدمون 👥'],
           ['words', 'كلمات 📖'],
           ['lessons', 'دروس 📘'],
           ['grammar', 'قواعد 📘'],
@@ -188,6 +233,65 @@ export default function AdminPage() {
           </button>
         ))}
       </div>
+
+      {tab === 'users' && (
+        <div style={{ display: 'grid', gap: 12 }}>
+          {users.map((u) => {
+            const left = u.premium_until
+              ? Math.ceil((new Date(u.premium_until).getTime() - Date.now()) / 86400000)
+              : null;
+            const active = u.is_premium && (left === null || left > 0);
+
+            return (
+              <div key={u.id} className="card">
+                <div
+                  style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    flexWrap: 'wrap',
+                    gap: 8,
+                    marginBottom: 10,
+                  }}
+                >
+                  <div>
+                    <b>{u.full_name || u.email}</b>
+                    <div className="muted small" dir="ltr" style={{ textAlign: 'right' }}>
+                      {u.email}
+                    </div>
+                  </div>
+                  <div className="muted small" style={{ fontWeight: 800 }}>
+                    {u.points ?? 0} نقطة ⭐
+                    {active && (
+                      <span style={{ color: '#0f766e', fontWeight: 900 }}>
+                        {' '}— 💎 {left === null ? 'دائم' : left + ' يومًا'}
+                      </span>
+                    )}
+                  </div>
+                </div>
+                <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                  <button className="btn btn-ghost" onClick={() => setPremium(u.id, 30)}>
+                    شهر (30)
+                  </button>
+                  <button className="btn btn-ghost" onClick={() => setPremium(u.id, 90)}>
+                    3 أشهر (90)
+                  </button>
+                  <button className="btn btn-primary" onClick={() => setPremium(u.id, 365)}>
+                    سنة (365) 🗓️
+                  </button>
+                  <button className="btn btn-ghost" onClick={() => setPermanent(u.id)}>
+                    دائم ♾️
+                  </button>
+                  {active && (
+                    <button className="pill pill-danger" onClick={() => removePremium(u.id)}>
+                      إلغاء
+                    </button>
+                  )}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
 
       {tab === 'words' && (
         <form className="card" onSubmit={addWord}>
@@ -221,7 +325,7 @@ export default function AdminPage() {
             <select className="input" value={lModule} onChange={(e) => setLModule(e.target.value)} required>
               <option value="">اختر وحدة...</option>
               {allModules.map((m) => (
-                <option key={m.id} value={m.id}>{m.label}</option>
+                <option key={m.id} value={m.label}>{m.label}</option>
               ))}
             </select>
           </div>
