@@ -37,7 +37,7 @@ export default function OfferNote() {
         lineHeight: 1.8,
       }}
     >
-      <span>🎉 تخفيضات الإطلاق: شهر $10 · 3 أشهر $30 · دائم $150</span>
+      <span>🎉 تخفيضات الإطلاق: شهر $10 · 3 أشهر $25 · سنة $80</span>
       <button
         onClick={hide}
         aria-label="إخفاء"

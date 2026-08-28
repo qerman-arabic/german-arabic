@@ -173,7 +173,7 @@ export default function DashboardPage() {
                   ? premiumLeft <= 3
                     ? 'يومًا متبقيًا ⏰'
                     : 'يومًا متبقيًا 💎'
-                  : 'اشتراك دائم 💎'}
+                  : 'سنه💎'}
               </span>
             </div>
           )}
