@@ -70,6 +70,18 @@ export default function AdminPage() {
     load();
   }, []);
 
+  function timeAgo(iso) {
+    const diff = Date.now() - new Date(iso).getTime();
+    const m = Math.floor(diff / 60000);
+    if (m < 1) return 'الآن';
+    if (m < 60) return 'قبل ' + m + ' دقيقة';
+    const h = Math.floor(m / 60);
+    if (h < 24) return 'قبل ' + h + ' ساعة';
+    const d = Math.floor(h / 24);
+    return 'قبل ' + d + ' يوم';
+  }
+
+
   function showToast(message) {
     setToast(message);
     setTimeout(() => setToast(''), 2500);
@@ -357,6 +369,11 @@ export default function AdminPage() {
                   <div>
                     <b>{u.full_name || u.email}</b>
                     <div className="muted small" dir="ltr" style={{ textAlign: 'right' }}>
+                    <div className="muted small" style={{ marginTop: 2 }}>
+                      {u.last_login
+                        ? '🕐 آخر دخول: ' + timeAgo(u.last_login)
+                        : '🕐 لم يفتح المنصة بعد'}
+                    </div>
                       {u.email}
                     </div>
                   </div>

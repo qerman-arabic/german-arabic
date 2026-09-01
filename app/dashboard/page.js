@@ -30,6 +30,11 @@ export default function DashboardPage() {
 
       setIsAdmin(session.user.email === ADMIN_EMAIL);
 
+      await supabase
+        .from('profiles')
+        .update({ last_login: new Date().toISOString() })
+        .eq('id', session.user.id);
+
       const [profileRes, levelsRes, progressRes] = await Promise.all([
         supabase.from('profiles').select('*').eq('id', session.user.id).single(),
         supabase
