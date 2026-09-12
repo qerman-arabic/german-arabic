@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '../../lib/supabase';
 import OfferNote from '../../components/OfferNote';
+import PushButton from '../../components/PushButton';
 
 const ADMIN_EMAIL = 'moayad.ahmad2014@gmail.com';
 
@@ -415,6 +416,12 @@ export default function DashboardPage() {
           );
         })}
       </div>
+
+      {/* ===== زر الإشعارات ===== */}
+      <div style={{ position: 'fixed', bottom: 14, left: 14, zIndex: 997 }}>
+        <PushButton />
+      </div>
+
       <OfferNote />
     </main>
   );
