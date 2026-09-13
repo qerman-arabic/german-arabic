@@ -12,6 +12,9 @@ export default function AdminPage() {
   const [levels, setLevels] = useState([]);
   const [users, setUsers] = useState([]);
   const [requests, setRequests] = useState([]);
+  const [pushTitle, setPushTitle] = useState('');
+  const [pushBody, setPushBody] = useState('');
+  const [pushBusy, setPushBusy] = useState(false);
   const [toast, setToast] = useState('');
 
   const [wLesson, setWLesson] = useState('');
@@ -70,6 +73,11 @@ export default function AdminPage() {
     load();
   }, []);
 
+  function showToast(message) {
+    setToast(message);
+    setTimeout(() => setToast(''), 2500);
+  }
+
   function timeAgo(iso) {
     const diff = Date.now() - new Date(iso).getTime();
     const m = Math.floor(diff / 60000);
@@ -79,12 +87,6 @@ export default function AdminPage() {
     if (h < 24) return 'قبل ' + h + ' ساعة';
     const d = Math.floor(h / 24);
     return 'قبل ' + d + ' يوم';
-  }
-
-
-  function showToast(message) {
-    setToast(message);
-    setTimeout(() => setToast(''), 2500);
   }
 
   async function refreshUsers() {
@@ -101,6 +103,22 @@ export default function AdminPage() {
       .select('*')
       .order('created_at', { ascending: false });
     setRequests(data || []);
+  }
+
+  async function sendPush() {
+    setPushBusy(true);
+    try {
+      const res = await fetch('/api/push/send', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: ADMIN_EMAIL, title: pushTitle, body: pushBody }),
+      });
+      const json = await res.json();
+      showToast(json.ok ? 'أُرسل إلى ' + json.sent + ' مشترك ✅' : 'فشل الإرسال');
+    } catch (e) {
+      showToast('فشل الإرسال');
+    }
+    setPushBusy(false);
   }
 
   async function fulfillRequest(req) {
@@ -263,6 +281,7 @@ export default function AdminPage() {
 
       <div className="pills" style={{ marginBottom: 20 }}>
         {[
+          ['push', 'إشعارات 🔔'],
           ['requests', 'طلبات الدفع 💰'],
           ['users', 'المستخدمون 👥'],
           ['words', 'كلمات 📖'],
@@ -284,6 +303,36 @@ export default function AdminPage() {
           </button>
         ))}
       </div>
+
+      {tab === 'push' && (
+        <div className="card">
+          <h2 className="section-title">إرسال تذكير لكل المشتركين 🔔</h2>
+          <p className="muted small" style={{ marginBottom: 14, lineHeight: 1.9 }}>
+            يصل الإشعار فورًا لكل من ضغط زر الجرس في لوحته وسمح بالإشعارات.
+          </p>
+          <div className="field">
+            <label>العنوان</label>
+            <input
+              className="input"
+              value={pushTitle}
+              onChange={(e) => setPushTitle(e.target.value)}
+              placeholder="مثال: درسك اليومي ينتظرك!"
+            />
+          </div>
+          <div className="field">
+            <label>نص الإشعار</label>
+            <input
+              className="input"
+              value={pushBody}
+              onChange={(e) => setPushBody(e.target.value)}
+              placeholder="مثال: 5 دقائق اليوم تحافظ على سلسلة أيامك 🔥"
+            />
+          </div>
+          <button className="btn btn-primary btn-lg" onClick={sendPush} disabled={pushBusy}>
+            {pushBusy ? 'جارٍ الإرسال...' : '📨 إرسال للجميع'}
+          </button>
+        </div>
+      )}
 
       {tab === 'requests' && (
         <div style={{ display: 'grid', gap: 12 }}>
@@ -369,12 +418,12 @@ export default function AdminPage() {
                   <div>
                     <b>{u.full_name || u.email}</b>
                     <div className="muted small" dir="ltr" style={{ textAlign: 'right' }}>
+                      {u.email}
+                    </div>
                     <div className="muted small" style={{ marginTop: 2 }}>
                       {u.last_login
                         ? '🕐 آخر دخول: ' + timeAgo(u.last_login)
                         : '🕐 لم يفتح المنصة بعد'}
-                    </div>
-                      {u.email}
                     </div>
                   </div>
                   <div className="muted small" style={{ fontWeight: 800 }}>
