@@ -18,11 +18,29 @@ export default function PushButton() {
   const [status, setStatus] = useState('hidden');
   const [busy, setBusy] = useState(false);
 
+  async function registerSubscription(sub) {
+    const { data } = await supabase.auth.getSession();
+    const email = data?.session?.user?.email || 'anon';
+    await fetch('/api/push/subscribe', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ subscription: sub.toJSON(), email }),
+    });
+  }
+
   useEffect(() => {
     if (!('Notification' in window) || !('serviceWorker' in navigator) || !PUBLIC_KEY) return;
+
     if (Notification.permission === 'granted') {
       navigator.serviceWorker.ready.then((reg) =>
-        reg.pushManager.getSubscription().then((sub) => setStatus(sub ? 'on' : 'off'))
+        reg.pushManager.getSubscription().then((sub) => {
+          if (sub) {
+            setStatus('on');
+            registerSubscription(sub);
+          } else {
+            setStatus('off');
+          }
+        })
       );
     } else if (Notification.permission !== 'denied') {
       setStatus('off');
@@ -47,15 +65,7 @@ export default function PushButton() {
         });
       }
 
-      const { data } = await supabase.auth.getSession();
-      const email = data?.session?.user?.email || 'anon';
-
-      await fetch('/api/push/subscribe', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ subscription: sub.toJSON(), email }),
-      });
-
+      await registerSubscription(sub);
       setStatus('on');
     } catch (e) {
       console.error(e);
