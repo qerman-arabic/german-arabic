@@ -16,12 +16,19 @@ export async function POST(req) {
     process.env.VAPID_PRIVATE_KEY
   );
 
-  const supabase = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-  );
+  const key =
+    process.env.SUPABASE_SERVICE_ROLE_KEY ||
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
-  const { data: subs } = await supabase.from('push_subscriptions').select('*');
+  const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL, key);
+
+  const { data: subs, error: selErr } = await supabase
+    .from('push_subscriptions')
+    .select('*');
+
+  if (selErr) {
+    return NextResponse.json({ ok: false, error: selErr.message }, { status: 500 });
+  }
 
   let sent = 0;
   for (const row of subs || []) {
