@@ -38,9 +38,11 @@ export default function VerbsPage() {
       </div>
 
       <div className="card" style={{ marginBottom: 16 }}>
-        <p className="muted" style={{ margin: 0, lineHeight: 2 }}>
-          120 فعلًا شاذًا — التصريف الكامل لكل الضمائر + PP.
+          <p className="muted" style={{ margin: 0, lineHeight: 2 }}>
+          <b style={{ color: 'var(--primary-dark)', fontSize: 18 }}>{verbs.length}</b>{' '}
+          فعلًا شاذًا — التصريف الكامل لكل الضمائر + PP.
           اضغط أي فعل لرؤية بطاقته الكاملة!
+          {q || level !== 'all' ? ` (الظاهر الآن: ${filtered.length})` : ''}
         </p>
       </div>
 
