@@ -160,7 +160,7 @@ export default function DashboardPage() {
     { href: '/writing', icon: '✍️', title: 'الكتابة', desc: 'مهام وتصحيح ذكي' },
     { href: '/speaking', icon: '🗣️', title: 'الشفوي', desc: '60 سيناريو بالمايك' },
     { href: '/grammar', icon: '📘', title: 'القواعد', desc: '96 قاعدة شاملة' },
-    { href: '/verbs', icon: '🔀', title: 'الأفعال الشاذة', desc: '60 فعلًا بتصريفها الكامل' },
+    { href: '/verbs', icon: '📚', title: 'قاموس الأفعال الغير منتظمة', desc: 'كل الأفعال بالتصريف الكامل' },
     { href: '/quiz', icon: '🎯', title: 'اختبار سريع', desc: 'يغذي قاموس أخطائك' },
     { href: '/mistakes', icon: '📕', title: 'قاموس أخطائك', desc: 'كلماتك الضعيفة تتجمع هنا' },
     { href: '/analysis', icon: '📈', title: 'تحليل الأخطاء', desc: 'اكتشف نمط ضعفك' },

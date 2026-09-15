@@ -39,9 +39,19 @@ export default function AdminPage() {
 
   const [vLevel, setVLevel] = useState('A1');
   const [vInf, setVInf] = useState('');
+  const [vPraesIch, setVPraesIch] = useState('');
+  const [vPraesDu, setVPraesDu] = useState('');
+  const [vPraesEr, setVPraesEr] = useState('');
+  const [vPraesWir, setVPraesWir] = useState('');
+  const [vPraesIhr, setVPraesIhr] = useState('');
+  const [vPraesSie, setVPraesSie] = useState('');
   const [vPraet, setVPraet] = useState('');
-  const [vPerf, setVPerf] = useState('');
+  const [vPP, setVPP] = useState('');
+  const [vHilfs, setVHilfs] = useState('haben');
+  const [vImp, setVImp] = useState('');
   const [vMean, setVMean] = useState('');
+  const [vExDe, setVExDe] = useState('');
+  const [vExAr, setVExAr] = useState('');
 
   useEffect(() => {
     async function load() {
@@ -260,20 +270,39 @@ export default function AdminPage() {
 
   async function addVerb(e) {
     e.preventDefault();
-    const { error } = await supabase.from('irregular_verbs').insert({
+    const { error } = await supabase.from('verbs').insert({
       level_code: vLevel,
       infinitive: vInf,
+      praesens_ich: vPraesIch,
+      praesens_du: vPraesDu,
+      praesens_er: vPraesEr,
+      praesens_wir: vPraesWir,
+      praesens_ihr: vPraesIhr,
+      praesens_sie: vPraesSie,
       praeteritum: vPraet,
-      perfekt: vPerf,
+      partizip_ii: vPP,
+      hilfsverb: vHilfs,
+      imperativ: vImp,
       meaning_ar: vMean,
+      example_de: vExDe,
+      example_ar: vExAr,
       sort_order: 99,
     });
     if (error) return showToast('خطأ: ' + error.message);
     showToast('تمت إضافة الفعل ✅');
     setVInf('');
+    setVPraesIch('');
+    setVPraesDu('');
+    setVPraesEr('');
+    setVPraesWir('');
+    setVPraesIhr('');
+    setVPraesSie('');
     setVPraet('');
-    setVPerf('');
+    setVPP('');
+    setVImp('');
     setVMean('');
+    setVExDe('');
+    setVExAr('');
   }
 
   if (loading) {
@@ -498,19 +527,65 @@ export default function AdminPage() {
           </div>
           <div className="field">
             <label>المصدر (Infinitiv)</label>
-            <input className="input" dir="ltr" value={vInf} onChange={(e) => setVInf(e.target.value)} required placeholder="مثال: gehen" />
+            <input className="input" dir="ltr" value={vInf} onChange={(e) => setVInf(e.target.value)} required placeholder="gehen" />
+          </div>
+          <div className="card" style={{ background: '#f8fafc', marginBottom: 12 }}>
+            <b>🔤 Präsens (الحاضر):</b>
+            <div className="field" style={{ marginTop: 8 }}>
+              <label>ich</label>
+              <input className="input" dir="ltr" value={vPraesIch} onChange={(e) => setVPraesIch(e.target.value)} required placeholder="gehe" />
+            </div>
+            <div className="field">
+              <label>du</label>
+              <input className="input" dir="ltr" value={vPraesDu} onChange={(e) => setVPraesDu(e.target.value)} required placeholder="gehst" />
+            </div>
+            <div className="field">
+              <label>er/sie/es</label>
+              <input className="input" dir="ltr" value={vPraesEr} onChange={(e) => setVPraesEr(e.target.value)} required placeholder="geht" />
+            </div>
+            <div className="field">
+              <label>wir</label>
+              <input className="input" dir="ltr" value={vPraesWir} onChange={(e) => setVPraesWir(e.target.value)} required placeholder="gehen" />
+            </div>
+            <div className="field">
+              <label>ihr</label>
+              <input className="input" dir="ltr" value={vPraesIhr} onChange={(e) => setVPraesIhr(e.target.value)} required placeholder="geht" />
+            </div>
+            <div className="field">
+              <label>sie/Sie</label>
+              <input className="input" dir="ltr" value={vPraesSie} onChange={(e) => setVPraesSie(e.target.value)} required placeholder="gehen" />
+            </div>
           </div>
           <div className="field">
-            <label>الماضي (Präteritum)</label>
-            <input className="input" dir="ltr" value={vPraet} onChange={(e) => setVPraet(e.target.value)} required placeholder="مثال: ging" />
+            <label>Präteritum (الماضي البسيط)</label>
+            <input className="input" dir="ltr" value={vPraet} onChange={(e) => setVPraet(e.target.value)} required placeholder="ging" />
           </div>
           <div className="field">
-            <label>التام (Perfekt)</label>
-            <input className="input" dir="ltr" value={vPerf} onChange={(e) => setVPerf(e.target.value)} required placeholder="مثال: ist gegangen" />
+            <label>PP (Partizip II)</label>
+            <input className="input" dir="ltr" value={vPP} onChange={(e) => setVPP(e.target.value)} required placeholder="gegangen" />
+          </div>
+          <div className="field">
+            <label>الفعل المساعد</label>
+            <select className="input" value={vHilfs} onChange={(e) => setVHilfs(e.target.value)}>
+              <option value="haben">haben</option>
+              <option value="sein">sein</option>
+            </select>
+          </div>
+          <div className="field">
+            <label>Imperativ (الأمر - اختياري)</label>
+            <input className="input" dir="ltr" value={vImp} onChange={(e) => setVImp(e.target.value)} placeholder="geh!" />
           </div>
           <div className="field">
             <label>المعنى بالعربية</label>
-            <input className="input" value={vMean} onChange={(e) => setVMean(e.target.value)} required placeholder="مثال: يذهب" />
+            <input className="input" value={vMean} onChange={(e) => setVMean(e.target.value)} required placeholder="يذهب" />
+          </div>
+          <div className="field">
+            <label>مثال بالألمانية (اختياري)</label>
+            <input className="input" dir="ltr" value={vExDe} onChange={(e) => setVExDe(e.target.value)} placeholder="Ich gehe zur Schule." />
+          </div>
+          <div className="field">
+            <label>ترجمة المثال (اختياري)</label>
+            <input className="input" value={vExAr} onChange={(e) => setVExAr(e.target.value)} placeholder="أنا أذهب إلى المدرسة." />
           </div>
           <button className="btn btn-primary">إضافة الفعل</button>
         </form>
