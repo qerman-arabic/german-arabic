@@ -78,7 +78,13 @@ export default function VerbsPage() {
         />
       </div>
 
-      <div style={{ display: 'grid', gap: 10 }}>
+      <div
+        style={{
+          display: 'grid',
+          gap: 10,
+          gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
+        }}
+      >
         {filtered.map((v) => (
           <button
             key={v.id}
