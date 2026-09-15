@@ -8,6 +8,7 @@ export default function VerbsPage() {
   const [level, setLevel] = useState('all');
   const [q, setQ] = useState('');
   const [selected, setSelected] = useState(null);
+  const [loggedIn, setLoggedIn] = useState(false);
 
   useEffect(() => {
     async function load() {
@@ -16,9 +17,14 @@ export default function VerbsPage() {
         .select('*')
         .order('sort_order');
       setVerbs(data || []);
+
+      const sess = await supabase.auth.getSession();
+      setLoggedIn(!!sess.data?.session);
     }
     load();
   }, []);
+
+  const locked = !loggedIn;
 
   const filtered = verbs.filter((v) => {
     const okLevel = level === 'all' || v.level_code === level;
@@ -30,6 +36,8 @@ export default function VerbsPage() {
     return okLevel && okQ;
   });
 
+  const displayList = locked ? filtered.slice(0, 3) : filtered;
+
   return (
     <main className="container">
       <div className="page-head">
@@ -38,7 +46,7 @@ export default function VerbsPage() {
       </div>
 
       <div className="card" style={{ marginBottom: 16 }}>
-          <p className="muted" style={{ margin: 0, lineHeight: 2 }}>
+        <p className="muted" style={{ margin: 0, lineHeight: 2 }}>
           <b style={{ color: 'var(--primary-dark)', fontSize: 18 }}>{verbs.length}</b>{' '}
           فعلًا شاذًا — التصريف الكامل لكل الضمائر + PP.
           اضغط أي فعل لرؤية بطاقته الكاملة!
@@ -87,7 +95,7 @@ export default function VerbsPage() {
           gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
         }}
       >
-        {filtered.map((v) => (
+        {displayList.map((v) => (
           <button
             key={v.id}
             className="card"
@@ -116,12 +124,53 @@ export default function VerbsPage() {
             </div>
           </button>
         ))}
-        {filtered.length === 0 && (
+        {!locked && filtered.length === 0 && (
           <div className="card muted" style={{ textAlign: 'center' }}>
             لا نتائج — جرّب كلمة أخرى
           </div>
         )}
       </div>
+
+      {/* ===== جدار التسجيل للزوار ===== */}
+      {locked && (
+        <div
+          className="card"
+          style={{
+            textAlign: 'center',
+            padding: '36px 18px',
+            marginTop: 14,
+            background: 'linear-gradient(135deg,#0f766e,#14b8a6)',
+            color: '#fff',
+            border: 'none',
+          }}
+        >
+          <div style={{ fontSize: 42, marginBottom: 8 }}>🔒</div>
+          <b style={{ fontSize: 21 }}>
+            باقي {Math.max(verbs.length - 3, 0)} فعلًا شاذًا بانتظارك!
+          </b>
+          <p style={{ margin: '10px auto 18px', maxWidth: 440, lineHeight: 1.9, opacity: 0.95 }}>
+            سجّل مجانًا بضغطة واحدة عبر Google، وانفتح لك فورًا:
+            التصريف الكامل لكل الضمائر + PP + الأمر + الأمثلة المترجمة
+            لكل الأفعال الـ {verbs.length} 🎁
+          </p>
+          <div style={{ display: 'flex', gap: 10, justifyContent: 'center', flexWrap: 'wrap' }}>
+            <a
+              href="/register"
+              className="btn btn-lg"
+              style={{ background: '#fff', color: '#0f766e', fontWeight: 900 }}
+            >
+              سجّل مجانًا عبر Google
+            </a>
+            <a
+              href="/login"
+              className="btn btn-lg"
+              style={{ background: 'rgba(255,255,255,.15)', color: '#fff' }}
+            >
+              لدي حساب بالفعل
+            </a>
+          </div>
+        </div>
+      )}
 
       {selected && (
         <div
