@@ -33,13 +33,14 @@ export default function VerbsPage() {
   return (
     <main className="container">
       <div className="page-head">
-        <h1 className="page-title">قاموس الأفعال 📚</h1>
+        <h1 className="page-title">الأفعال الشاذة 🔀</h1>
         <a className="btn btn-ghost" href="/dashboard">← لوحة التعلم</a>
       </div>
 
       <div className="card" style={{ marginBottom: 16 }}>
         <p className="muted" style={{ margin: 0, lineHeight: 2 }}>
-          جميع الأفعال الألمانية مع التصريف الكامل والأمثلة — اضغط أي فعل لرؤية التفاصيل!
+          120 فعلًا شاذًا — التصريف الكامل لكل الضمائر + PP.
+          اضغط أي فعل لرؤية بطاقته الكاملة!
         </p>
       </div>
 
@@ -97,7 +98,7 @@ export default function VerbsPage() {
               <div dir="ltr" style={{ fontWeight: 900, fontSize: 17, textAlign: 'left', flex: 1 }}>
                 {v.infinitive}
                 <span className="muted" style={{ fontWeight: 400, marginLeft: 8 }}>
-                  — {v.perfekt}
+                  — {v.partizip_ii}
                 </span>
               </div>
               <div style={{ fontWeight: 800 }}>{v.meaning_ar}</div>
@@ -132,9 +133,9 @@ export default function VerbsPage() {
             onClick={(e) => e.stopPropagation()}
             className="card"
             style={{
-              maxWidth: 520,
+              maxWidth: 600,
               width: '100%',
-              maxHeight: '85vh',
+              maxHeight: '90vh',
               overflowY: 'auto',
             }}
           >
@@ -159,14 +160,39 @@ export default function VerbsPage() {
             </div>
 
             <div className="card" style={{ background: '#f8fafc', marginBottom: 12 }}>
-              <b>🔤 التصريف الكامل:</b>
-              <div dir="ltr" style={{ marginTop: 8, lineHeight: 2.2 }}>
-                <div><b>Präsens:</b> ich {selected.praesens_ich} · du {selected.praesens_du} · er/sie {selected.praesens_er}</div>
-                <div><b>Präteritum:</b> {selected.praeteritum}</div>
-                <div><b>Perfekt:</b> {selected.perfekt} <span className="muted">({selected.hilfsverb})</span></div>
-                {selected.imperativ && <div><b>Imperativ:</b> {selected.imperativ}</div>}
+              <b>🔤 التصريف الكامل (Präsens) — كل الضمائر:</b>
+              <div dir="ltr" style={{ marginTop: 8, lineHeight: 2.1 }}>
+                <div><b>ich:</b> {selected.praesens_ich}</div>
+                <div><b>du:</b> {selected.praesens_du}</div>
+                <div><b>er/sie/es:</b> {selected.praesens_er}</div>
+                <div><b>wir:</b> {selected.praesens_wir}</div>
+                <div><b>ihr:</b> {selected.praesens_ihr}</div>
+                <div><b>sie/Sie:</b> {selected.praesens_sie}</div>
               </div>
             </div>
+
+            <div className="card" style={{ background: '#f0fdf4', marginBottom: 12 }}>
+              <b>📅 الأزمنة الماضية:</b>
+              <div dir="ltr" style={{ marginTop: 8, lineHeight: 2.1 }}>
+                <div><b>Präteritum:</b> {selected.praeteritum}</div>
+                <div>
+                  <b>Perfekt:</b> {selected.hilfsverb} {selected.partizip_ii}
+                </div>
+                <div>
+                  <b>PP:</b>{' '}
+                  <span style={{ color: '#0f766e', fontWeight: 900 }}>{selected.partizip_ii}</span>
+                </div>
+              </div>
+            </div>
+
+            {selected.imperativ && selected.imperativ !== '—' && (
+              <div className="card" style={{ background: '#fef3c7', marginBottom: 12 }}>
+                <b>⚡ Imperativ (الأمر):</b>
+                <div dir="ltr" style={{ marginTop: 6, fontWeight: 700, fontSize: 16 }}>
+                  {selected.imperativ}
+                </div>
+              </div>
+            )}
 
             {selected.example_de && (
               <div className="card" style={{ background: '#eff6ff' }}>
