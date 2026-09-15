@@ -37,6 +37,12 @@ export default function AdminPage() {
   const [eOpts, setEOpts] = useState(['', '', '', '']);
   const [eCorrect, setECorrect] = useState(0);
 
+  const [vLevel, setVLevel] = useState('A1');
+  const [vInf, setVInf] = useState('');
+  const [vPraet, setVPraet] = useState('');
+  const [vPerf, setVPerf] = useState('');
+  const [vMean, setVMean] = useState('');
+
   useEffect(() => {
     async function load() {
       const { data } = await supabase.auth.getSession();
@@ -252,6 +258,24 @@ export default function AdminPage() {
     setEOpts(['', '', '', '']);
   }
 
+  async function addVerb(e) {
+    e.preventDefault();
+    const { error } = await supabase.from('irregular_verbs').insert({
+      level_code: vLevel,
+      infinitive: vInf,
+      praeteritum: vPraet,
+      perfekt: vPerf,
+      meaning_ar: vMean,
+      sort_order: 99,
+    });
+    if (error) return showToast('خطأ: ' + error.message);
+    showToast('تمت إضافة الفعل ✅');
+    setVInf('');
+    setVPraet('');
+    setVPerf('');
+    setVMean('');
+  }
+
   if (loading) {
     return (
       <main className="container">
@@ -284,6 +308,7 @@ export default function AdminPage() {
           ['push', 'إشعارات 🔔'],
           ['requests', 'طلبات الدفع 💰'],
           ['users', 'المستخدمون 👥'],
+          ['verbs', 'أفعال شاذة 🔀'],
           ['words', 'كلمات 📖'],
           ['lessons', 'دروس 📘'],
           ['grammar', 'قواعد 📘'],
@@ -458,6 +483,37 @@ export default function AdminPage() {
             );
           })}
         </div>
+      )}
+
+      {tab === 'verbs' && (
+        <form className="card" onSubmit={addVerb}>
+          <h2 className="section-title">إضافة فعل شاذ 🔀</h2>
+          <div className="field">
+            <label>المستوى</label>
+            <select className="input" value={vLevel} onChange={(e) => setVLevel(e.target.value)}>
+              {['A1', 'A2', 'B1', 'B2'].map((l) => (
+                <option key={l} value={l}>{l}</option>
+              ))}
+            </select>
+          </div>
+          <div className="field">
+            <label>المصدر (Infinitiv)</label>
+            <input className="input" dir="ltr" value={vInf} onChange={(e) => setVInf(e.target.value)} required placeholder="مثال: gehen" />
+          </div>
+          <div className="field">
+            <label>الماضي (Präteritum)</label>
+            <input className="input" dir="ltr" value={vPraet} onChange={(e) => setVPraet(e.target.value)} required placeholder="مثال: ging" />
+          </div>
+          <div className="field">
+            <label>التام (Perfekt)</label>
+            <input className="input" dir="ltr" value={vPerf} onChange={(e) => setVPerf(e.target.value)} required placeholder="مثال: ist gegangen" />
+          </div>
+          <div className="field">
+            <label>المعنى بالعربية</label>
+            <input className="input" value={vMean} onChange={(e) => setVMean(e.target.value)} required placeholder="مثال: يذهب" />
+          </div>
+          <button className="btn btn-primary">إضافة الفعل</button>
+        </form>
       )}
 
       {tab === 'words' && (
